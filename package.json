@@ -1,0 +1,65 @@
+{
+  "name": "asset-disposal-singaporepools",
+  "version": "1.0.0",
+  "description": "A simple CAP project.",
+  "repository": "<Add your repository here>",
+  "license": "UNLICENSED",
+  "private": true,
+  "dependencies": {
+    "@cap-js-community/odata-v2-adapter": "^1.13.3",
+    "@cap-js/hana": "^1",
+    "@cap-js/sdm": "^1.2.0",
+    "@sap-cloud-sdk/http-client": "^3.18.1",
+    "@sap-cloud-sdk/resilience": "^3.18.0",
+    "@sap/cds": "^8.2.3",
+    "@sap/cds-hana": "^2",
+    "@sap/xssec": "^4",
+    "express": "^4",
+    "passport": "^0"
+  },
+  "devDependencies": {
+    "@cap-js/cds-types": "^0.6",
+    "@cap-js/sqlite": "^1",
+    "@sap/cds-dk": "^8",
+    "@sap/ux-specification": "UI5-1.128",
+    "rimraf": "^5.0.5"
+  },
+  "scripts": {
+    "start": "cds-serve",
+    "watch-assetdisposal": "cds watch --open assetdisposal/webapp/index.html?sap-ui-xx-viewCache=false",
+    "undeploy": "cf undeploy asset-disposal-singaporepools --delete-services --delete-service-keys --delete-service-brokers",
+    "build": "rimraf resources mta_archives && mbt build --mtar archive",
+    "deploy": "cf deploy mta_archives/archive.mtar --retries 1"
+  },
+  "cds": {
+    "sql": {
+      "native_hana_associations": false
+    },
+    "fiori": {
+      "bypass_draft": true
+    },
+    "requires": {
+      "destinations": true,
+      "html5-repo": true,
+      "db": "hana",
+      "sdm": {
+        "settings": {
+          "repositoryId": "925175fe-7e41-4c93-ae93-b49b67b678d8"
+        }
+      },
+      "spa-process-automation": {
+        "kind": "rest",
+        "credentials": {
+          "destination": "sap_process_automation_service"
+        }
+      },
+      "[hybrid]": {
+        "auth": "xsuaa"
+      },
+      "auth": "xsuaa"
+    }
+  },
+  "sapux": [
+    "app/assetdisposal"
+  ]
+}
