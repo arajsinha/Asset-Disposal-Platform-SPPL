@@ -32,11 +32,6 @@ annotate service.RequestDetails with @(
     UI.Identification : [
         {
             $Type : 'UI.DataFieldForAction',
-            Action : 'AssetDisposal.RefreshAuditTrail',
-            Label : 'Refresh Audit Trail',
-        },
-        {
-            $Type : 'UI.DataFieldForAction',
             Action : 'AssetDisposal.withdraw',
             Label : 'Withdraw Request',
             Determining : true,

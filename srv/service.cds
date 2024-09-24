@@ -9,10 +9,7 @@ service AssetDisposal {
 
   entity AssetDetails   as projection on spassets.AssetDetails;
 
-  entity AuditTrail     as projection on spassets.AuditTrail
-    actions {
-      action RefreshAuditTrail();
-    }
+  entity AuditTrail     as projection on spassets.AuditTrail;
 
   entity Workflows      as projection on spassets.Workflows;
 }
