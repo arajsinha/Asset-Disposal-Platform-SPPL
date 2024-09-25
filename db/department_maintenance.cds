@@ -3,8 +3,8 @@ using { cuid, managed } from '@sap/cds/common';
 
 entity Departments : cuid, managed {
     name         : String(100);
-    users        : Association to many Users on users.department = $self;
-    costCenters  : Association to many CostCenters on costCenters.department = $self;
+    users        : Composition of many Users on users.department = $self;
+    costCenters  : Composition of many CostCenters on costCenters.department = $self;
 }
 
 entity Users : cuid, managed {

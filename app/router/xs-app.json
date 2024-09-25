@@ -17,6 +17,5 @@
       "destination": "srv-api",
       "csrfProtection": true
     }
-  ],
-  "welcomeFile": "/nsassetdisposal"
+  ]
 }

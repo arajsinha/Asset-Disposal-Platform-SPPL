@@ -45,6 +45,20 @@
         "vcap": {
           "name": "auth"
         }
+      },
+      "custom-service:sdm-di-instance": {
+        "binding": {
+          "type": "cf",
+          "apiEndpoint": "https://api.cf.eu10-004.hana.ondemand.com",
+          "org": "Technical Field Enablement_sap-process-automation-tfe",
+          "space": "DEV",
+          "instance": "sdm-di-instance",
+          "key": "sdm-di-instance-key",
+          "resolved": false
+        },
+        "vcap": {
+          "name": "custom-service:sdm-di-instance"
+        }
       }
     }
   }

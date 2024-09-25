@@ -20,14 +20,14 @@ annotate service.Departments with @(
         {
             $Type : 'UI.ReferenceFacet',
             Label : 'Users',
-            ID : 'Table',
-            Target : 'users/@UI.LineItem#Table',
+            ID : 'Users',
+            Target : 'users/@UI.LineItem#Users',
         },
         {
             $Type : 'UI.ReferenceFacet',
-            Label : 'Cost Center',
-            ID : 'CostCenter',
-            Target : 'costCenters/@UI.LineItem#CostCenter',
+            Label : 'Cost Centers',
+            ID : 'CostCenters',
+            Target : 'costCenters/@UI.LineItem#CostCenters',
         },
     ],
     UI.LineItem : [
@@ -37,6 +37,14 @@ annotate service.Departments with @(
             Value : name,
         },
     ],
+    UI.HeaderInfo : {
+        Title : {
+            $Type : 'UI.DataField',
+            Value : name,
+        },
+        TypeName : '',
+        TypeNamePlural : '',
+    },
 );
 
 annotate service.Users with @(
@@ -51,7 +59,14 @@ annotate service.Users with @(
             Value : email,
             Label : 'Email ID',
         },
-    ]
+    ],
+    UI.LineItem #Users : [
+        {
+            $Type : 'UI.DataField',
+            Value : email,
+            Label : 'email',
+        },
+    ],
 );
 
 annotate service.CostCenters with @(
@@ -61,6 +76,13 @@ annotate service.CostCenters with @(
             Value : department.costCenters.costCenter,
             Label : 'Cost Center',
         },
-    ]
+    ],
+    UI.LineItem #CostCenters : [
+        {
+            $Type : 'UI.DataField',
+            Value : costCenter,
+            Label : 'costCenter',
+        },
+    ],
 );
 

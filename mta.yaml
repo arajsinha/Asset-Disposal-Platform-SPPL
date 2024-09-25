@@ -95,6 +95,7 @@ resources:
     parameters:
       config:
         tenant-mode: dedicated
+        xsappname: asset-disposal-singaporepools-${org}-${space}
       path: ./xs-security.json
       service: xsuaa
       service-plan: application

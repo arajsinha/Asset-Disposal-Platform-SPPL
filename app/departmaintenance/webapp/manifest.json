@@ -127,17 +127,7 @@
           "options": {
             "settings": {
               "navigation": {},
-              "contextPath": "/Departments",
-              "controlConfiguration": {
-                "users/@com.sap.vocabularies.UI.v1.LineItem#Table": {
-                  "tableSettings": {
-                    "creationMode": {
-                      "createAtEnd": true,
-                      "name": "Inline"
-                    }
-                  }
-                }
-              }
+              "contextPath": "/Departments"
             }
           }
         }
