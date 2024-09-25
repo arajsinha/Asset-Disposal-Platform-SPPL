@@ -1,0 +1,25 @@
+### Variables
+@clientid = sb-fb39a0e7-2e75-48d4-8064-d02092d2ed2f!b132941|sdm-di-SDM_DI_PROD-prod!b41064
+@clientsecret = xXthyaLDPizdIkujg0SFDjCcStw=
+
+
+### Step 1 Get OAuth Token
+# @name postLogin
+POST https://sap-process-automation-tfe.authentication.eu10.hana.ondemand.com/oauth/token
+Content-Type: application/x-www-form-urlencoded
+
+grant_type=client_credentials&client_id={{clientid}}&client_secret={{clientsecret}}
+
+### Read oauth response
+@oauth_token = {{postLogin.response.body.access_token}}
+
+### All repo browser
+GET https://api-sdm-di.cfapps.eu10.hana.ondemand.com/browser
+
+Authorization: Bearer {{oauth_token}}
+
+### Single Repo Browser
+@repo = 999bd158-197f-4798-8bf6-434795ea703f
+GET https://api-sdm-di.cfapps.eu10.hana.ondemand.com/browser/{{repo}}?cmisselector=repositoryInfo
+Authorization: Bearer {{oauth_token}}
+
