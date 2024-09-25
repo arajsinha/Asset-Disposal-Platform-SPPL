@@ -58,9 +58,23 @@ modules:
       - nsassetdisposal.zip
       name: nsassetdisposal
       target-path: app//
+    - artifacts:
+      - departmaintenance.zip
+      name: departmaintenance
+      target-path: app//
 - name: nsassetdisposal
   type: html5
   path: app/assetdisposal
+  build-parameters:
+    build-result: dist
+    builder: custom
+    commands:
+    - npm install
+    - npm run build:cf
+    supported-platforms: []
+- name: departmaintenance
+  type: html5
+  path: app/departmaintenance
   build-parameters:
     build-result: dist
     builder: custom
