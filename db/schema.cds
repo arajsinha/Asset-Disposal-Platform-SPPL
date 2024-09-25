@@ -38,17 +38,17 @@ entity RequestStatus : CodeList {
 }
 
 entity AssetDetails : cuid, managed {
-    assetNumber       : String;
-    subNumber         : String;
-    costCenter        : String;
-    assetClass        : String;
-    assetDesc         : String;
+    assetNumber       : String (19);
+    subNumber         : String (6);
+    costCenter        : String (12);
+    assetClass        : String (10);
+    assetDesc         : String (10);
     assetPurchaseDate : Date;
     assetPurchaseCost : Integer;
     netBookValue      : Integer;
-    companyCode       : String;
-    reasonWriteOff    : String;
-    disposalMethod    : String;
+    companyCode       : String (6);
+    reasonWriteOff    : String (100);
+    disposalMethod    : String (100);
     scrapValue        : Integer;
     requestDetails    : Association to one RequestDetails;
 }

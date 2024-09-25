@@ -196,7 +196,22 @@ annotate service.RequestDetails with @(
     }
 );
 annotate service.AssetDetails with {
-    assetNumber @Common.FieldControl : #Mandatory
+    assetNumber @(
+        Common.FieldControl : #Mandatory,
+        Common.ValueList : {
+            $Type : 'Common.ValueListType',
+            CollectionPath : 'YY1_FIXED_ASSETS_CC',
+            Parameters : [
+                {
+                    $Type : 'Common.ValueListParameterInOut',
+                    LocalDataProperty : assetNumber,
+                    ValueListProperty : 'MasterFixedAsset',
+                },
+            ],
+            Label : 'Asset Number',
+        },
+        Common.ValueListWithFixedValues : false,
+    )
 };
 annotate service.AssetDetails with {
     reasonWriteOff @Common.FieldControl : #Mandatory
@@ -240,12 +255,6 @@ annotate service.AssetDetails with @(
             },],
     }
 );
-annotate service.AssetDetails with {
-    assetNumber @Common.Text : {
-            $value : assetDesc,
-            ![@UI.TextArrangement] : #TextLast,
-        }
-};
 annotate service.Workflows with @(
     UI.LineItem #AuditTrail : [
         {
