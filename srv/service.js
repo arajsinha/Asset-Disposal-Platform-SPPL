@@ -11,6 +11,12 @@ module.exports = class AssetDisposal extends cds.ApplicationService {
         let obj = []
         let workflowID = null
 
+        const fixa = await cds.connect.to('YY1_FIXED_ASSET');
+
+        this.on('READ', 'YY1_FIXED_ASSETS_CC', async req => {
+            return fixa.run(req.query);
+        });
+
         this.before("CREATE", "RequestDetails", async (req) => {
             try {
                 let count = await SELECT.one.from(RequestDetails).columns('count(ID) as val');
@@ -55,7 +61,7 @@ module.exports = class AssetDisposal extends cds.ApplicationService {
                                 if (!existingTask && task.type != 'WORKFLOW_STARTED' && task.type != 'EXCLUSIVE_GATEWAY_REACHED') {
                                     let recipientsString = task.recipientUsers.join(', ');
                                     let recipientsGroupString = task.recipientGroups.join(', ');
-                                    if(task.recipientGroups.length == 0) recipientsGroupString = ''
+                                    if (task.recipientGroups.length == 0) recipientsGroupString = ''
                                     await INSERT.into(AuditTrail).entries({
                                         taskID: task.id,
                                         type: task.type,

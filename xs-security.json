@@ -1,6 +1,11 @@
 {
   "xsappname": "asset-disposal-singaporepools",
   "tenant-mode": "dedicated",
+  "oauth2-configuration": {
+    "redirect-uris": [
+      "http://localhost:5000/"
+    ]
+  },
   "description": "Security profile of called application",
   "scopes": [
     {
@@ -16,5 +21,6 @@
         "uaa.user"
       ]
     }
-  ]
+  ],
+  "attributes": []
 }

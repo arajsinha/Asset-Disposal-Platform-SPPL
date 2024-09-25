@@ -1,6 +1,7 @@
 using spassets from '../db/schema';
 using deptassets from '../db/department_maintenance';
 
+
 service DepartmentMaintenance {
   entity Users           as projection on deptassets.Users;
 
@@ -19,4 +20,5 @@ service AssetDisposal {
   entity AssetDetails   as projection on spassets.AssetDetails;
   entity AuditTrail     as projection on spassets.AuditTrail;
   entity Workflows      as projection on spassets.Workflows;
+  entity YY1_FIXED_ASSETS_CC as projection on spassets.YY1_FIXED_ASSETS_CC;
 }

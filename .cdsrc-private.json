@@ -16,6 +16,21 @@
           "name": "db"
         }
       },
+      "destinations": {
+        "binding": {
+          "type": "cf",
+          "apiEndpoint": "https://api.cf.eu10-004.hana.ondemand.com",
+          "org": "Technical Field Enablement_sap-process-automation-tfe",
+          "space": "DEV",
+          "instance": "sp-destination",
+          "key": "sp-destination-key",
+          "resolved": false
+        },
+        "kind": "destinations",
+        "vcap": {
+          "name": "destinations"
+        }
+      },
       "auth": {
         "binding": {
           "type": "cf",

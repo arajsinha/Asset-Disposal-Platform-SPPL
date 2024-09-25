@@ -5,7 +5,7 @@ annotate service.Departments with @(
         Data : [
             {
                 $Type : 'UI.DataField',
-                Label : 'name',
+                Label : 'Department Name',
                 Value : name,
             },
         ],
@@ -44,17 +44,12 @@ annotate service.Users with @(
         {
             $Type : 'UI.DataField',
             Value : department_ID,
-            Label : 'department_ID',
+            Label : 'Department ID',
         },
         {
             $Type : 'UI.DataField',
             Value : email,
-            Label : 'email',
-        },
-        {
-            $Type : 'UI.DataField',
-            Value : ID,
-            Label : 'ID',
+            Label : 'Email ID',
         },
     ]
 );
@@ -64,7 +59,7 @@ annotate service.CostCenters with @(
         {
             $Type : 'UI.DataField',
             Value : department.costCenters.costCenter,
-            Label : 'costCenter',
+            Label : 'Cost Center',
         },
     ]
 );
