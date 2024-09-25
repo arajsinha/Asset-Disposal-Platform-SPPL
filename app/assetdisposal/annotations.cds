@@ -142,6 +142,11 @@ annotate service.AssetDetails with @(
         },
         {
             $Type : 'UI.DataField',
+            Value : requestDetails.assetDetails.assetDesc,
+            Label : 'Asset Description',
+        },
+        {
+            $Type : 'UI.DataField',
             Value : subNumber,
             Label : 'Sub No.',
         },{
@@ -170,11 +175,6 @@ annotate service.AssetDetails with @(
             $Type : 'UI.DataField',
             Value : netBookValue,
             Label : 'Net Book Value',
-        },
-        {
-            $Type : 'UI.DataField',
-            Value : reasonWriteOff,
-            Label : 'Reason for Write Off',
         },{
             $Type : 'UI.DataField',
             Value : disposalMethod,
@@ -183,6 +183,11 @@ annotate service.AssetDetails with @(
             $Type : 'UI.DataField',
             Value : scrapValue,
             Label : 'Salvage Value',
+        },
+        {
+            $Type : 'UI.DataField',
+            Value : reasonWriteOff,
+            Label : 'Reason for Write Off',
         },]
 );
 annotate service.RequestDetails with @(
@@ -205,7 +210,7 @@ annotate service.AssetDetails with {
                 {
                     $Type : 'Common.ValueListParameterInOut',
                     LocalDataProperty : assetNumber,
-                    ValueListProperty : 'MasterFixedAsset',
+                    ValueListProperty : 'FixedAssetExternalID',
                 },
             ],
             Label : 'Asset Number',
@@ -345,5 +350,44 @@ annotate service.AuditTrail with {
 
 annotate service.AuditTrail with {
     recipientUsers @Common.FieldControl : #ReadOnly
+};
+
+annotate service.YY1_FIXED_ASSETS_CC with {
+    FixedAssetExternalID @Common.Text : {
+        $value : FixedAssetDescription,
+        ![@UI.TextArrangement] : #TextLast,
+    }
+};
+
+annotate service.AssetDetails with {
+    assetDesc @Common.FieldControl : #ReadOnly
+};
+
+annotate service.AssetDetails with {
+    subNumber @Common.FieldControl : #ReadOnly
+};
+
+annotate service.AssetDetails with {
+    assetClass @Common.FieldControl : #ReadOnly
+};
+
+annotate service.AssetDetails with {
+    costCenter @Common.FieldControl : #ReadOnly
+};
+
+annotate service.AssetDetails with {
+    assetPurchaseDate @Common.FieldControl : #ReadOnly
+};
+
+annotate service.AssetDetails with {
+    assetPurchaseCost @Common.FieldControl : #ReadOnly
+};
+
+annotate service.AssetDetails with {
+    companyCode @Common.FieldControl : #ReadOnly
+};
+
+annotate service.AssetDetails with {
+    netBookValue @Common.FieldControl : #ReadOnly
 };
 

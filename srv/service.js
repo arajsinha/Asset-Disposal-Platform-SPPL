@@ -14,7 +14,9 @@ module.exports = class AssetDisposal extends cds.ApplicationService {
         const fixa = await cds.connect.to('YY1_FIXED_ASSET');
 
         this.on('READ', 'YY1_FIXED_ASSETS_CC', async req => {
-            return fixa.run(req.query);
+            let ans = fixa.run(req.query);
+            console.log(ans)
+            return ans;
         });
 
         this.before("CREATE", "RequestDetails", async (req) => {

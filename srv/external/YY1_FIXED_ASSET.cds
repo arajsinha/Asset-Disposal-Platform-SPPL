@@ -1,4 +1,4 @@
-/* checksum : b3f70b987867662657be3a675f3fb787 */
+/* checksum : eca080e06172ea588569d76b09fc1655 */
 @cds.external : true
 @m.IsDefaultEntityContainer : 'true'
 @sap.message.scope.supported : 'true'
@@ -6,6 +6,7 @@
 service YY1_FIXED_ASSET {};
 
 @cds.external : true
+@cds.persistence.skip : true
 @sap.creatable : 'false'
 @sap.updatable : 'false'
 @sap.deletable : 'false'
@@ -44,5 +45,29 @@ entity YY1_FIXED_ASSET.YY1_FIXED_ASSETS_CC {
   @sap.required.in.filter : 'false'
   @sap.label : 'Asset Class'
   AssetClass : String(8);
+  @sap.display.format : 'UpperCase'
+  @sap.required.in.filter : 'false'
+  @sap.label : 'Asset Number'
+  FixedAssetExternalID : String(17);
+  @sap.display.format : 'UpperCase'
+  @sap.required.in.filter : 'false'
+  @sap.label : 'Serial Number'
+  AssetSerialNumber : String(18);
+  @sap.display.format : 'Date'
+  @sap.required.in.filter : 'false'
+  @sap.label : 'First Acquisition on'
+  @sap.quickinfo : 'Asset Value Date of the First Posting'
+  AcquisitionValueDate : Date;
+  @sap.required.in.filter : 'false'
+  @sap.unit : 'Currency'
+  @sap.label : 'Original Value'
+  @sap.quickinfo : 'Original Acquisition Value'
+  OriglAcqnAmtInCoCodeCrcy : Decimal(24, 3);
+  @sap.display.format : 'UpperCase'
+  @sap.required.in.filter : 'false'
+  @sap.label : 'Currency'
+  @sap.quickinfo : 'Currency Key'
+  @sap.semantics : 'currency-code'
+  Currency : String(5);
 };
 

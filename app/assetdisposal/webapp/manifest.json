@@ -127,7 +127,34 @@
           "options": {
             "settings": {
               "editableHeaderContent": false,
-              "contextPath": "/RequestDetails"
+              "contextPath": "/RequestDetails",
+              "controlConfiguration": {
+                "assetDetails/@com.sap.vocabularies.UI.v1.LineItem#Assets": {
+                  "columns": {
+                    "DataField::requestDetails::assetDetails::assetDesc": {
+                      "width": "20%"
+                    },
+                    "DataField::subNumber": {
+                      "width": "5%"
+                    },
+                    "DataField::assetClass": {
+                      "width": "8%"
+                    },
+                    "DataField::costCenter": {
+                      "width": "8%"
+                    },
+                    "DataField::assetPurchaseDate": {
+                      "width": "8%"
+                    },
+                    "DataField::netBookValue": {
+                      "width": "8%"
+                    },
+                    "DataField::disposalMethod": {
+                      "width": "8%"
+                    }
+                  }
+                }
+              }
             }
           }
         }
