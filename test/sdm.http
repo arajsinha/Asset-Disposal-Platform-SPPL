@@ -15,7 +15,6 @@ grant_type=client_credentials&client_id={{clientid}}&client_secret={{clientsecre
 
 ### All repo browser
 GET https://api-sdm-di.cfapps.eu10.hana.ondemand.com/browser
-
 Authorization: Bearer {{oauth_token}}
 
 ### Single Repo Browser

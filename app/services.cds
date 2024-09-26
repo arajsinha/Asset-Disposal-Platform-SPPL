@@ -1,4 +1,4 @@
 
-using from './assetdisposal/annotations';
+using from './assetusermap/annotations';
 
-using from './departmaintenance/annotations';
+using from './assetdisposalrequest/annotations';
