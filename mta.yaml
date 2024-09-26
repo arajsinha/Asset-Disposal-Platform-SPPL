@@ -118,7 +118,7 @@ resources:
       init_data:
         instance:
           destinations:
-          - Authentication: OAuth2UserTokenExchange
+          - Authentication: NoAuthentication
             HTML5.DynamicDestination: true
             HTML5.ForwardAuthToken: true
             Name: asset-disposal-singaporepools-srv-api
