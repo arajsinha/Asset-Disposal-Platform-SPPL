@@ -116,15 +116,19 @@ resources:
     config:
       HTML5Runtime_enabled: true
       init_data:
-        instance:
+        subaccount:
           destinations:
           - Authentication: NoAuthentication
             HTML5.DynamicDestination: true
             HTML5.ForwardAuthToken: true
+            WebIDEEnabled: true
             Name: asset-disposal-singaporepools-srv-api
             ProxyType: Internet
             Type: HTTP
             URL: ~{srv-api/srv-url}
+          existing_destinations_policy: update
+        instance:
+          destinations:
           - Authentication: NoAuthentication
             Name: ui5
             ProxyType: Internet
