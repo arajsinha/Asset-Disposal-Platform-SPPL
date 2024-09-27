@@ -1,0 +1,13 @@
+
+################################################################################
+# Task UI OData Calls
+################################################################################
+
+### Metadata
+GET http://localhost:4004/odata/v4/asset-disposal-task-ui/$metadata
+
+### Read Requests
+GET http://localhost:4004/odata/v4/asset-disposal-task-ui/RequestDetails
+
+### Call Audit Trail Action
+GET http://localhost:4004/odata/v4/asset-disposal-task-ui/RequestDetails(ID=0db8ef46-a69e-4a0e-ba0e-172990ea76df)/AssetDisposal.withdraw

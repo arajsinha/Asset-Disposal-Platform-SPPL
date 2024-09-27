@@ -5,35 +5,29 @@ annotate service.RequestDetails with @(
     UI.LineItem : [
         {
             $Type : 'UI.DataField',
-            Label : 'Request Date',
             Value : date,
         },
         {
             $Type : 'UI.DataField',
             Value : objectId,
-            Label : 'Request ID',
         },
         {
             $Type : 'UI.DataField',
             Value : requestorName,
-            Label : 'Requestor Name',
         },
         {
             $Type : 'UI.DataField',
             Value : totalPurchaseCost,
-            Label : 'Total Purchase Cost',
         },
         {
             $Type : 'UI.DataField',
             Value : RequestStatus_id,
-            Label : 'Request Status',
         },
     ],
     UI.Identification : [
         {
             $Type : 'UI.DataFieldForAction',
             Action : 'AssetDisposal.withdraw',
-            Label : 'Withdraw Request',
             Determining : true,
         },
     ],
@@ -45,26 +39,21 @@ annotate service.RequestDetails with @(
             {
                 $Type : 'UI.DataField',
                 Value : RequestStatus.id,
-                Label : 'ID',
             },
             {
                 $Type : 'UI.DataField',
                 Value : requestorName,
-                Label : 'Requestor Name',
             },
             {
                 $Type : 'UI.DataField',
                 Value : departmentName,
-                Label : 'Department Name',
             },
             {
                 $Type : 'UI.DataField',
                 Value : totalPurchaseCost,
-                Label : 'Total Purchase Cost',
             },
             {
                 $Type : 'UI.DataField',
-                Label : 'Request Status',
                 Value : RequestStatus_id,
             },
         ],
@@ -97,39 +86,30 @@ annotate service.RequestDetails with @(
             {
                 $Type : 'UI.DataField',
                 Value : assetDetails.assetNumber,
-                Label : 'Asset Number',
             },{
                 $Type : 'UI.DataField',
                 Value : assetDetails.assetClass,
-                Label : 'Asset Class',
             },{
                 $Type : 'UI.DataField',
                 Value : assetDetails.assetDesc,
-                Label : 'Asset Description',
             },{
                 $Type : 'UI.DataField',
                 Value : assetDetails.assetPurchaseCost,
-                Label : 'Asset Purchase Cost',
             },{
                 $Type : 'UI.DataField',
                 Value : assetDetails.assetPurchaseDate,
-                Label : 'Asset Purchase Date',
             },{
                 $Type : 'UI.DataField',
                 Value : assetDetails.netBookValue,
-                Label : 'Net Book Value',
             },{
                 $Type : 'UI.DataField',
                 Value : assetDetails.companyCode,
-                Label : 'Company Code',
             },{
                 $Type : 'UI.DataField',
                 Value : assetDetails.reasonWriteOff,
-                Label : 'Write Off Reason',
             },{
                 $Type : 'UI.DataField',
                 Value : assetDetails.scrapValue,
-                Label : 'Scrap Value',
             },],
     }
 );
@@ -138,56 +118,44 @@ annotate service.AssetDetails with @(
         {
             $Type : 'UI.DataField',
             Value : assetNumber,
-            Label : 'Asset Number',
         },
         {
             $Type : 'UI.DataField',
             Value : requestDetails.assetDetails.assetDesc,
-            Label : 'Asset Description',
         },
         {
             $Type : 'UI.DataField',
             Value : subNumber,
-            Label : 'Sub No.',
         },{
             $Type : 'UI.DataField',
             Value : assetClass,
-            Label : 'Asset Class',
         },
         {
             $Type : 'UI.DataField',
             Value : costCenter,
-            Label : 'Cost Center',
         },{
             $Type : 'UI.DataField',
             Value : assetPurchaseDate,
-            Label : 'Purchase Date',
         },{
             $Type : 'UI.DataField',
             Value : assetPurchaseCost,
-            Label : 'Purchase Cost',
         },{
             $Type : 'UI.DataField',
             Value : companyCode,
-            Label : 'Company Code',
         },
         {
             $Type : 'UI.DataField',
             Value : netBookValue,
-            Label : 'Net Book Value',
         },{
             $Type : 'UI.DataField',
             Value : disposalMethod,
-            Label : 'Disposal Method',
         },{
             $Type : 'UI.DataField',
             Value : scrapValue,
-            Label : 'Salvage Value',
         },
         {
             $Type : 'UI.DataField',
             Value : reasonWriteOff,
-            Label : 'Reason for Write Off',
         },]
 );
 annotate service.RequestDetails with @(
@@ -236,27 +204,21 @@ annotate service.AssetDetails with @(
             {
                 $Type : 'UI.DataField',
                 Value : assetNumber,
-                Label : 'assetNumber',
             },{
                 $Type : 'UI.DataField',
                 Value : assetDesc,
-                Label : 'assetDesc',
             },{
                 $Type : 'UI.DataField',
                 Value : assetClass,
-                Label : 'assetClass',
             },{
                 $Type : 'UI.DataField',
                 Value : assetPurchaseCost,
-                Label : 'assetPurchaseCost',
             },{
                 $Type : 'UI.DataField',
                 Value : assetPurchaseDate,
-                Label : 'assetPurchaseDate',
             },{
                 $Type : 'UI.DataField',
                 Value : companyCode,
-                Label : 'companyCode',
             },],
     }
 );
@@ -265,24 +227,20 @@ annotate service.Workflows with @(
         {
             $Type : 'UI.DataField',
             Value : auditTrail.subject,
-            Label : 'subject',
         },
         {
             $Type : 'UI.DataField',
             Value : auditTrail.timestamp,
-            Label : 'timestamp',
         }
     ],
     UI.LineItem #AuditTrail1 : [
         {
             $Type : 'UI.DataField',
             Value : auditTrail.subject,
-            Label : 'subject',
         },
         {
             $Type : 'UI.DataField',
             Value : auditTrail.timestamp,
-            Label : 'timestamp',
         }
     ],
     UI.Facets : [
@@ -300,13 +258,11 @@ annotate service.AuditTrail with @(
         {
             $Type : 'UI.DataField',
             Value : subject,
-            Label : 'subject',
             @Common.FieldControl : #ReadOnly
         },
         {
             $Type : 'UI.DataField',
             Value : timestamp,
-            Label : 'timestamp',
             @Common.FieldControl : #ReadOnly
         }
     ],
@@ -314,24 +270,20 @@ annotate service.AuditTrail with @(
         {
             $Type : 'UI.DataField',
             Value : subject,
-            Label : 'Subject',
             @Common.FieldControl : #ReadOnly
         },
         {
             $Type : 'UI.DataField',
             Value : timestamp,
-            Label : 'Time Stamp',
             @Common.FieldControl : #ReadOnly
         },
         {
             $Type : 'UI.DataField',
             Value : recipientUsers,
-            Label : 'Workflow Recipient Users',
         },
         {
             $Type : 'UI.DataField',
             Value : recipientGroups,
-            Label : 'Workflow Recipient Groups',
         },
     ],
 );

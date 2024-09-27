@@ -12,9 +12,9 @@ entity YY1_FIXED_ASSETS_CC as projection on fixedasset.YY1_FIXED_ASSETS_CC;
 
 entity RequestDetails : cuid, managed {
     date              : Date;
-    requestorName     : String;
+    requestorName     : String(100);
     departmentName    : String(100);
-    totalPurchaseCost : Integer;
+    totalPurchaseCost : String(100);
     assetDetails      : Composition of many AssetDetails
                             on assetDetails.requestDetails = $self;
     objectId          : String(14);
@@ -38,19 +38,20 @@ entity RequestStatus : CodeList {
 }
 
 entity AssetDetails : cuid, managed {
-    assetNumber       : String (19);
-    subNumber         : String (6);
-    costCenter        : String (12);
-    assetClass        : String (10);
-    assetDesc         : String (10);
+    assetNumber       : String(19) @title: 'Asset Number';
+    subNumber         : String(6);
+    costCenter        : String(12);
+    assetClass        : String(10);
+    assetDesc         : String(10);
     assetPurchaseDate : Date;
-    assetPurchaseCost : Integer;
-    netBookValue      : Integer;
-    companyCode       : String (6);
-    reasonWriteOff    : String (100);
-    disposalMethod    : String (100);
-    scrapValue        : Integer;
+    assetPurchaseCost : Decimal(24, 3);
+    netBookValue      : Decimal(24, 3);
+    companyCode       : String(6);
+    reasonWriteOff    : String(100);
+    disposalMethod    : String(100);
+    scrapValue        : Decimal(24, 3);
     requestDetails    : Association to one RequestDetails;
+    Currency          : String(5);
 }
 
 entity AuditTrail : cuid, managed {

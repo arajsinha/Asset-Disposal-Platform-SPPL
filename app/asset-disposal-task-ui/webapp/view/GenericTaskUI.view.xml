@@ -1,12 +1,90 @@
-<mvc:View controllerName="assetdisposaltaskui.controller.GenericTaskUI" xmlns:mvc="sap.ui.core.mvc" displayBlock="true" xmlns="sap.m">
+<mvc:View
+    controllerName="assetdisposaltaskui.controller.GenericTaskUI"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns:l="sap.ui.layout"
+    xmlns:f="sap.ui.layout.form"
+    displayBlock="true"
+    xmlns="sap.m"
+>
     <!-- <App id="app"> -->
-        <!-- <pages> -->
-            <Page showHeader="false" showFooter="false">
-                <content>
-                    <Input value="{context>/requestId}" id="__input0"/>
-                    <Text text="Test" id="__input1"/>
-                </content>
-            </Page>
-        <!-- </pages>
+    <!-- <pages> -->
+    <Page
+        showHeader="false"
+        showFooter="false"
+    >
+        <content>
+            <f:SimpleForm
+                editable="true"
+                layout="ColumnLayout"
+                title="General Information"
+                columnsM="2"
+                columnsL="3"
+                columnsXL="4"
+            >
+                <f:content>
+                    <Label text="Request ID" />
+                    <Text text="{objectId}" />
+
+                    <Label text="Requestor Name" />
+                    <Text text="{requestorName}" />
+
+                    <Label text="Department Name" />
+                    <Text text="{departmentName}" />
+
+                    <Label text="Total Purchase Cost" />
+                    <Text text="{totalPurchaseCost}" />
+                </f:content>
+            </f:SimpleForm>
+
+            <Table
+                id="idProductsTable"
+                autoPopinMode="true"
+                contextualWidth="Auto"
+                items="{
+			path: '/AssetDetails'
+		}"
+            >
+                <headerToolbar>
+                    <OverflowToolbar>
+                        <content>
+                            <Title
+                                text="Products"
+                                level="H2"
+                            />
+                            <ToolbarSpacer />
+                        </content>
+                    </OverflowToolbar>
+                </headerToolbar>
+                <columns>
+                    <Column width="auto">
+                        <Text text="Asset Number" />
+                    </Column>
+
+                    <Column
+                        width="auto"
+                        hAlign="End"
+                    >
+                        <Text text="Netbook Value" />
+                    </Column>
+                </columns>
+                <items>
+                    <ColumnListItem vAlign="Middle">
+                        <cells>
+                            <Text text="{assetNumber}" />
+                            <ObjectNumber
+                                number="{
+								parts:[{path:'netBookValue'},{path:'Currency'}],
+								type: 'sap.ui.model.type.Currency',
+								formatOptions: {showMeasure: false}
+							}"
+                                unit="{Currency}"
+                            />
+                        </cells>
+                    </ColumnListItem>
+                </items>
+            </Table>
+        </content>
+    </Page>
+    <!-- </pages>
     </App> -->
 </mvc:View>
