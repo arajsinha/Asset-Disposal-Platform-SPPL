@@ -360,10 +360,6 @@ annotate service.YY1_FIXED_ASSETS_CC with {
 };
 
 annotate service.AssetDetails with {
-    assetDesc @Common.FieldControl : #ReadOnly
-};
-
-annotate service.AssetDetails with {
     subNumber @Common.FieldControl : #ReadOnly
 };
 

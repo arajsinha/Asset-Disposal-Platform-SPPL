@@ -3,11 +3,12 @@
   "authenticationMethod": "route",
   "routes": [
     {
-      "source": "^/odata/(.*)$",
-      "target": "/odata/$1",
-      "destination": "asset-disposal-singaporepools-srv-api",
-      "authenticationType": "xsuaa",
-      "csrfProtection": true
+      "source": "^/api/(.*)$",
+      "target": "$1",
+      "service": "com.sap.spa.processautomation",
+      "endpoint": "api",
+      "csrfProtection": true,
+      "authenticationType": "xsuaa"
     },
     {
       "source": "^/resources/(.*)$",

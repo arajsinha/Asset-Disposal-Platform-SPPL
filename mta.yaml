@@ -10,7 +10,6 @@ modules:
       - name: asset-disposal-auth
       - name: asset-disposal-singaporepools-db
       - name: asset-disposal-singaporepools-destination
-      - name: asset-disposal-singaporepools-attachments
     provides:
       - name: srv-api
         properties:
@@ -45,6 +44,10 @@ modules:
         - artifacts:
             - assetdisposalrequest.zip
           name: assetdisposalrequest
+          target-path: app//
+        - artifacts:
+            - assetdisposaltaskui.zip
+          name: assetdisposaltaskui
           target-path: app//
   - name: asset-disposal-singaporepools-destination-content
     type: com.sap.application.content
@@ -85,8 +88,6 @@ modules:
       commands:
         - npm install
         - npm run build:cf
-        - npm ci
-        - npm run build
       supported-platforms:
         []
   - name: assetdisposalrequest
@@ -98,8 +99,17 @@ modules:
       commands:
         - npm install
         - npm run build:cf
-        - npm ci
-        - npm run build
+      supported-platforms:
+        []
+  - name: assetdisposaltaskui
+    type: html5
+    path: app/asset-disposal-task-ui
+    build-parameters:
+      build-result: dist
+      builder: custom
+      commands:
+        - npm install
+        - npm run build:cf
       supported-platforms:
         []
 resources:
@@ -108,7 +118,6 @@ resources:
     parameters:
       config:
         tenant-mode: dedicated
-        xsappname: asset-disposal-singaporepools-${org}-${space}
       path: ./xs-security.json
       service: xsuaa
       service-name: asset-disposal-auth
@@ -157,11 +166,6 @@ resources:
     parameters:
       service: html5-apps-repo
       service-plan: app-runtime
-  - name: asset-disposal-singaporepools-attachments
-    type: org.cloudfoundry.managed-service
-    parameters:
-      service: objectstore
-      service-plan: standard
 parameters:
   deploy_mode: html5-repo
   enable-parallel-deployments: true

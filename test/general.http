@@ -1,0 +1,19 @@
+https://technical-field-enablement-sap-process-automation-tfe-d5fc1b39a.cfapps.eu10-004.hana.ondemand.com/odata/v4/asset-disposal/$metadata
+
+### Variables
+@clientid = sb-asset-disposal-singaporepools!t132941
+@clientsecret = ACFlVs88pfEoS8EwjA5HDEvz9kc=
+
+### Step 1 Get OAuth Token
+# @name postLogin
+POST https://sap-process-automation-tfe.authentication.eu10.hana.ondemand.com/oauth/token
+Content-Type: application/x-www-form-urlencoded
+
+grant_type=client_credentials&client_id={{clientid}}&client_secret={{clientsecret}}
+
+### Read oauth response
+@oauth_token = {{postLogin.response.body.access_token}}
+
+### All data
+GET https://technical-field-enablement-sap-process-automation-tfe-d5fc1b39a.cfapps.eu10-004.hana.ondemand.com/odata/v4/asset-disposal/$metadata
+Authorization: Bearer {{oauth_token}}

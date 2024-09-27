@@ -1,0 +1,12 @@
+<mvc:View controllerName="assetdisposaltaskui.controller.GenericTaskUI" xmlns:mvc="sap.ui.core.mvc" displayBlock="true" xmlns="sap.m">
+    <!-- <App id="app"> -->
+        <!-- <pages> -->
+            <Page showHeader="false" showFooter="false">
+                <content>
+                    <Input value="{context>/requestId}" id="__input0"/>
+                    <Text text="Test" id="__input1"/>
+                </content>
+            </Page>
+        <!-- </pages>
+    </App> -->
+</mvc:View>
