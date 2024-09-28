@@ -5,7 +5,7 @@ module.exports = class AssetDisposal extends cds.ApplicationService {
 
     async init() {
         console.log("Service JS Triggered")
-        const { RequestDetails, RequestStatus, AssetDetails, AuditTrail, Workflows, YY1_FIXED_ASSETS_CC } = cds.entities;
+        const { RequestDetails, RequestStatus, AssetDetails, AuditTrail, Workflows, YY1_FIXED_ASSETS_CC } = this.entities;
         const logger = cds.log('srv');
 
         let obj = []
@@ -22,8 +22,8 @@ module.exports = class AssetDisposal extends cds.ApplicationService {
         this.on('sideEffectTriggerAction', "AssetDetails.drafts", async (req) => {
             console.log("Hit it")
             // 100001
-            let assetData = await SELECT.from(YY1_FIXED_ASSETS_CC).where({'FixedAssetExternalID':'100001-0'});
-            console.log(assetData)
+            // let assetData = fixa.run(SELECT.from(YY1_FIXED_ASSETS_CC).where({'FixedAssetExternalID':'100001-0'}));
+            // console.log(assetData)
         })
 
         this.before("CREATE", "RequestDetails", async (req) => {
@@ -105,7 +105,7 @@ module.exports = class AssetDisposal extends cds.ApplicationService {
         })
 
         this.after("CREATE", "RequestDetails", async (req) => {
-            obj = []
+            let obj = []
             obj.push(req)
             let workflowContext = {}
             workflowContext.date = obj[0].date;
