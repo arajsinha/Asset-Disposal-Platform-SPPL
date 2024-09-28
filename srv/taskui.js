@@ -5,7 +5,7 @@ module.exports = class AssetDisposalTaskUI extends cds.ApplicationService {
 
     async init() {
         console.log("Service JS Triggered")
-        const { RequestDetails, RequestStatus, AssetDetails, AuditTrail, Workflows } = cds.entities;
+        const { RequestDetails, AssetDetails, AuditTrail } = this.entities;
         const logger = cds.log('srv');
 
         let obj = []
@@ -14,13 +14,25 @@ module.exports = class AssetDisposalTaskUI extends cds.ApplicationService {
         // const DB = await cds.connect.to('DB');
 
         this.on("addAuditTrial", "RequestDetails", async (req) => {
-            console.log(req.params[0])
-
+            // console.log(req.data)
+            console.log(req.user);
+            return;
+            await INSERT.into(AuditTrail).entries(
+                {
+                    workflows_ID: req.data.workflowId,
+                    requestDetails_ID: req.data.requestId,
+                    taskID: req.data.taskID,
+                    taskDescription: req.data.taskName,
+                    subject: req.data.taskTitle,
+                    timestamp: new Date,
+                    approver: req.user.attr.email,
+                    approverName: `${req.user.attr.givenName} ${req.user.attr.familyName}`
+                }
+            )
         })
 
         this.on("void", "RequestDetails", async (req) => {
-            console.log(obj)
-
+            console.log(req.user);
         })
 
         return super.init()

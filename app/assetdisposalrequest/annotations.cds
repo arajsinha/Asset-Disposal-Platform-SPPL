@@ -275,11 +275,7 @@ annotate service.AuditTrail with @(
         },
         {
             $Type : 'UI.DataField',
-            Value : recipientUsers,
-        },
-        {
-            $Type : 'UI.DataField',
-            Value : recipientGroups,
+            Value : approver,
         },
     ],
 );
@@ -293,11 +289,7 @@ annotate service.AuditTrail with @(
 );
 
 annotate service.AuditTrail with {
-    recipientGroups @Common.FieldControl : #ReadOnly
-};
-
-annotate service.AuditTrail with {
-    recipientUsers @Common.FieldControl : #ReadOnly
+    approver @Common.FieldControl : #ReadOnly
 };
 
 annotate service.YY1_FIXED_ASSETS_CC with {

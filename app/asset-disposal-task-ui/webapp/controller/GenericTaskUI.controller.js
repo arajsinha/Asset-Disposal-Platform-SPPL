@@ -10,17 +10,14 @@ sap.ui.define([
     return Controller.extend("assetdisposaltaskui.controller.GenericTaskUI", {
       onInit: function () {
         if (!this.getOwnerComponent().loadedConext) {
-          let objectId = "d3340187-0be9-4f32-ab21-02b667326500"
-          this.getView().bindElement({ path: `/RequestDetails(ID=${objectId},IsActiveEntity=true)` });
+          let requestId = "d3340187-0be9-4f32-ab21-02b667326500"
+          this.getView().bindElement({ path: `/RequestDetails(ID=${requestId},IsActiveEntity=true)` });
           return;
         }
         this.getOwnerComponent().loadedConext.then(function () {
           let context = this.getOwnerComponent().getContext();
-          let objectId = context.objectId;
-          if (!context) {
-            objectId = "d3340187-0be9-4f32-ab21-02b667326500"
-          }
-          this.getView().bindElement({ path: `/RequestDetails(ID=${objectId},IsActiveEntity=true)` });
+          let requestId = context.requestId;
+          this.getView().bindElement({ path: `/RequestDetails(ID=${requestId},IsActiveEntity=true)` });
 
           // const bookBinding = this.getView().getModel().bindContext(`/Header(ID=${objectId},IsActiveEntity=true)`, null, {
           //   $expand: { "assetDetails": { $select: ["*"], $expand: { "OS": { $select: ["*"] }, "manufacturer": { $select: ["*"] } } } }
@@ -47,6 +44,9 @@ sap.ui.define([
 
         }.bind(this));
 
+      },
+      addAuditTrailDymmy: function(){
+        this.getOwnerComponent().updateAuditTrial();
       }
     });
   });

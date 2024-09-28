@@ -55,12 +55,12 @@ entity AssetDetails : cuid, managed {
 }
 
 entity AuditTrail : cuid, managed {
-    taskID          : String;
-    taskDescription : String;
+    taskID          : String(100);
+    taskDescription : String(100);
     timestamp       : Timestamp;
     subject         : String;
-    recipientUsers  : String;
-    recipientGroups : String;
+    approver        : String;
+    approverName    : String;
     workflows       : Association to Workflows; // Connects to RequestDetails entity
     requestDetails  : Association to RequestDetails; // Connects to RequestDetails entity
 }

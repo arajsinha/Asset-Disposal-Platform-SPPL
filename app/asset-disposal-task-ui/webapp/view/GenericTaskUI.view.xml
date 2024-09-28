@@ -33,6 +33,7 @@
 
                     <Label text="Total Purchase Cost" />
                     <Text text="{totalPurchaseCost}" />
+                    <Button text="Audit Trail" press=".addAuditTrailDymmy"></Button>
                 </f:content>
             </f:SimpleForm>
 

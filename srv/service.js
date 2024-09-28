@@ -71,13 +71,15 @@ module.exports = class AssetDisposal extends cds.ApplicationService {
                                     let recipientsString = task.recipientUsers.join(', ');
                                     let recipientsGroupString = task.recipientGroups.join(', ');
                                     if (task.recipientGroups.length == 0) recipientsGroupString = ''
+                                    
+                                    // #### -> We should remove this code right? ####
                                     await INSERT.into(AuditTrail).entries({
                                         taskID: task.id,
                                         type: task.type,
                                         timestamp: task.timestamp,
                                         subject: task.subject,
-                                        recipientUsers: recipientsString,
-                                        recipientGroups: recipientsGroupString,
+                                        // recipientUsers: recipientsString,
+                                        // recipientGroups: recipientsGroupString,
                                         workflows_ID: workflow.workflowID,
                                         requestDetails_ID: req[0].ID,
                                     });
