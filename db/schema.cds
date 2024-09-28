@@ -39,7 +39,7 @@ entity RequestStatus : CodeList {
 
 entity AssetDetails : cuid, managed {
     assetNumber       : String(19) @title: 'Asset Number';
-    subNumber         : String(6);
+    subNumber         : String(6); 
     costCenter        : String(12);
     assetClass        : String(10);
     assetDesc         : String(10);

@@ -33,7 +33,12 @@ annotate service.Departments with @(
     UI.LineItem : [
         {
             $Type : 'UI.DataField',
-            Label : 'name',
+            Value : ID,
+            Label : 'ID',
+        },
+        {
+            $Type : 'UI.DataField',
+            Label : ' Department Name',
             Value : name,
         },
     ],
@@ -64,7 +69,7 @@ annotate service.Users with @(
         {
             $Type : 'UI.DataField',
             Value : email,
-            Label : 'email',
+            Label : 'Email ID',
         },
     ],
 );
@@ -81,7 +86,7 @@ annotate service.CostCenters with @(
         {
             $Type : 'UI.DataField',
             Value : costCenter,
-            Label : 'costCenter',
+            Label : 'Cost Center',
         },
     ],
 );

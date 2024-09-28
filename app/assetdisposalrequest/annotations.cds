@@ -38,10 +38,6 @@ annotate service.RequestDetails with @(
         Data : [
             {
                 $Type : 'UI.DataField',
-                Value : RequestStatus.id,
-            },
-            {
-                $Type : 'UI.DataField',
                 Value : requestorName,
             },
             {
@@ -337,5 +333,29 @@ annotate service.AssetDetails with {
 
 annotate service.AssetDetails with {
     netBookValue @Common.FieldControl : #ReadOnly
+};
+
+annotate service.RequestDetails with {
+    departmentName @(Common.ValueList : {
+            $Type : 'Common.ValueListType',
+            CollectionPath : 'Departments',
+            Parameters : [
+                {
+                    $Type : 'Common.ValueListParameterInOut',
+                    LocalDataProperty : departmentName,
+                    ValueListProperty : 'name',
+                },
+            ],
+            Label : 'Department Name',
+        },
+        Common.ValueListWithFixedValues : false
+)};
+
+annotate service.RequestDetails with {
+    RequestStatus @Common.FieldControl : #ReadOnly
+};
+
+annotate service.RequestDetails with {
+    totalPurchaseCost @Common.FieldControl : #ReadOnly
 };
 

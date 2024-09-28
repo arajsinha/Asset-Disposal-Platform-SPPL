@@ -21,4 +21,3 @@ Authorization: Bearer {{oauth_token}}
 @repo = 999bd158-197f-4798-8bf6-434795ea703f
 GET https://api-sdm-di.cfapps.eu10.hana.ondemand.com/browser/{{repo}}?cmisselector=repositoryInfo
 Authorization: Bearer {{oauth_token}}
-

@@ -1,24 +1,48 @@
 using spassets from '../db/schema';
 using deptassets from '../db/department_maintenance';
 
+// namespace sap.fe.core;
 
 service DepartmentMaintenance {
-  entity Users           as projection on deptassets.Users;
+  entity Users       as projection on deptassets.Users;
 
   @odata.draft.enabled
-  entity Departments     as projection on deptassets.Departments;
-  entity CostCenters     as projection on deptassets.CostCenters;
+  entity Departments as projection on deptassets.Departments;
+
+  entity CostCenters as projection on deptassets.CostCenters;
 }
 
 service AssetDisposal {
   @odata.draft.enabled
-  entity RequestDetails as projection on spassets.RequestDetails
+  entity RequestDetails      as projection on spassets.RequestDetails
     actions {
       action withdraw();
     }
 
-  entity AssetDetails   as projection on spassets.AssetDetails;
-  entity AuditTrail     as projection on spassets.AuditTrail;
-  entity Workflows      as projection on spassets.Workflows;
+  // @odata.draft.enabled
+  entity AssetDetails        as projection on spassets.AssetDetails
+    actions {
+      action sideEffectTriggerAction();
+    };
+
+  annotate AssetDetails with @(Common: {SideEffects #triggerActionProperty: {
+    SourceProperties: [assetNumber],
+    TargetProperties: [
+      'assetDesc',
+      'subNumber',
+      'assetClass',
+      'costCenter',
+      'assetPurchaseDate',
+      'assetPurchaseCost',
+      'companyCode',
+      'netBookValue'
+    ],
+    TriggerAction   : 'AssetDisposal.sideEffectTriggerAction'
+  }});
+
+  entity AuditTrail          as projection on spassets.AuditTrail;
+  entity Workflows           as projection on spassets.Workflows;
   entity YY1_FIXED_ASSETS_CC as projection on spassets.YY1_FIXED_ASSETS_CC;
+  entity Departments         as projection on deptassets.Departments;
+  entity CostCenters         as projection on deptassets.CostCenters;
 }
