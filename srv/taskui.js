@@ -13,7 +13,12 @@ module.exports = class AssetDisposalTaskUI extends cds.ApplicationService {
 
         // const DB = await cds.connect.to('DB');
 
-        this.on("withdraw", "RequestDetails", async (req) => {
+        this.on("addAuditTrial", "RequestDetails", async (req) => {
+            console.log(obj)
+
+        })
+
+        this.on("void", "RequestDetails", async (req) => {
             console.log(obj)
 
         })
