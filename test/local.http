@@ -3,6 +3,8 @@
 # Task UI OData Calls
 ################################################################################
 
+@requestId = d3340187-0be9-4f32-ab21-02b667326500
+
 ### Metadata
 GET http://localhost:4004/odata/v4/asset-disposal-task-ui/$metadata
 
@@ -10,4 +12,4 @@ GET http://localhost:4004/odata/v4/asset-disposal-task-ui/$metadata
 GET http://localhost:4004/odata/v4/asset-disposal-task-ui/RequestDetails
 
 ### Call Audit Trail Action
-GET http://localhost:4004/odata/v4/asset-disposal-task-ui/RequestDetails(ID=0db8ef46-a69e-4a0e-ba0e-172990ea76df)/AssetDisposal.withdraw
+POST http://localhost:4004/odata/v4/asset-disposal-task-ui/RequestDetails(ID={{requestId}})/AssetDisposalTaskUI.addAuditTrial
