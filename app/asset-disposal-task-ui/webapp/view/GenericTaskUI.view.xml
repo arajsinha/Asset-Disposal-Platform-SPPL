@@ -41,7 +41,7 @@
                 autoPopinMode="true"
                 contextualWidth="Auto"
                 items="{
-			path: '/AssetDetails'
+			path: 'assetDetails'
 		}"
             >
                 <headerToolbar>

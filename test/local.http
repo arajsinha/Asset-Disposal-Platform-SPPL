@@ -9,7 +9,10 @@
 GET http://localhost:4004/odata/v4/asset-disposal-task-ui/$metadata
 
 ### Read Requests
-GET http://localhost:4004/odata/v4/asset-disposal-task-ui/RequestDetails
+GET http://localhost:4004/odata/v2/asset-disposal-task-ui/RequestDetails
+
+### Call Single Request V2
+GET http://localhost:4004/odata/v2/asset-disposal-task-ui/RequestDetails(guid'{{requestId}}')
 
 ### Call Audit Trail Action
 POST http://localhost:4004/odata/v4/asset-disposal-task-ui/RequestDetails(ID={{requestId}})/AssetDisposalTaskUI.addAuditTrial

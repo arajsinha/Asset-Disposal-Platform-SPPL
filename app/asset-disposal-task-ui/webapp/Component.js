@@ -19,7 +19,7 @@ sap.ui.define(
          * @public
          * @override
          */
-        init: function () {
+        init: async function () {
           // call the base component's init function
           UIComponent.prototype.init.apply(this, arguments);
 
@@ -32,7 +32,7 @@ sap.ui.define(
             return;
           }
 
-          this.setTaskModels();
+          await this.setTaskModels();
           const rejectOutcomeId = "reject";
           this.getInboxAPI().addAction(
             {
@@ -71,7 +71,7 @@ sap.ui.define(
           this.setModel(taskContextModel, "context");
 
           // parse Date objects and set in own model
-          await taskContextModel.loadData(this._getTaskInstancesBaseURL() + "/context");
+          this.loadedConext =  taskContextModel.loadData(this._getTaskInstancesBaseURL() + "/context");
         },
 
         _getTaskInstancesBaseURL: function () {

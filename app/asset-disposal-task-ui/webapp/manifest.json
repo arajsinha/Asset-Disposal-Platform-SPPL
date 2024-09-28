@@ -17,12 +17,12 @@
         },
         "dataSources": {
             "mainService": {
-                "uri": "/odata/v2/asset-disposal/",
+                "uri": "/odata/v4/asset-disposal/",
                 "type": "OData",
                 "settings": {
                     "annotations": [],
                     "localUri": "localService/metadata.xml",
-                    "odataVersion": "2.0"
+                    "odataVersion": "4.0"
                 }
             }
         }
@@ -72,7 +72,12 @@
             "": {
                 "dataSource": "mainService",
                 "preload": true,
-                "settings": {}
+                "settings": {
+                    "synchronizationMode": "None",
+                    "operationMode": "Server",
+                    "autoExpandSelect": true,
+                    "earlyRequests": true
+                }
             }
         },
         "resources": {
