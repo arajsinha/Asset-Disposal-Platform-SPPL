@@ -71,7 +71,7 @@ annotate service.RequestDetails with @(
             $Type : 'UI.ReferenceFacet',
             Label : 'Audit Trail',
             ID : 'AuditTrail',
-            Target : 'AuditTrail/@UI.LineItem#AuditTrail',
+            Target : 'AuditTrail/@UI.SelectionPresentationVariant#AuditTrail',
         },
     ]
 );
@@ -265,8 +265,17 @@ annotate service.AuditTrail with @(
     UI.LineItem #AuditTrail : [
         {
             $Type : 'UI.DataField',
-            Value : subject,
-            @Common.FieldControl : #ReadOnly
+            Value : taskType,
+            Label : 'taskType',
+        },
+        {
+            $Type : 'UI.DataField',
+            Value : approver,
+        },
+        {
+            $Type : 'UI.DataField',
+            Value : approverName,
+            Label : 'approverName',
         },
         {
             $Type : 'UI.DataField',
@@ -275,9 +284,31 @@ annotate service.AuditTrail with @(
         },
         {
             $Type : 'UI.DataField',
-            Value : approver,
+            Value : comment,
+            Label : 'comment',
         },
     ],
+    UI.SelectionPresentationVariant #AuditTrail : {
+        $Type : 'UI.SelectionPresentationVariantType',
+        PresentationVariant : {
+            $Type : 'UI.PresentationVariantType',
+            Visualizations : [
+                '@UI.LineItem#AuditTrail',
+            ],
+            SortOrder : [
+                {
+                    $Type : 'Common.SortOrderType',
+                    Property : timestamp,
+                    Descending : true,
+                },
+            ],
+        },
+        SelectionVariant : {
+            $Type : 'UI.SelectionVariantType',
+            SelectOptions : [
+            ],
+        },
+    },
 );
 
 annotate service.AuditTrail with @(
