@@ -17,9 +17,6 @@
     "express": "^4",
     "passport": "^0"
   },
-  "engines": {
-    "node": "^20.16.0"
-  },
   "devDependencies": {
     "@cap-js/cds-types": "^0.6",
     "@cap-js/sqlite": "^1",
