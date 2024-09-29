@@ -61,7 +61,7 @@
                     <OverflowToolbar>
                         <content>
                             <Title
-                                text="Products"
+                                text="Assets"
                                 level="H2"
                             />
                             <ToolbarSpacer />

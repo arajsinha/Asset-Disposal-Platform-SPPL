@@ -187,7 +187,7 @@ sap.ui.define(
         updateAuditTrial: function () {
           let context = this.getContext();
           let requestId = context.requestId;
-
+          let data = this.getModel("approvalModel").getData();
           const path = this._getPath();
           return new Promise(function (resolve, reject) {
             $.ajax({
