@@ -203,7 +203,8 @@ sap.ui.define(
                 "taskName": context.taskData.TaskDefinitionName,
                 "taskTitle": context.taskData.TaskTitle,
                 "workflowId": context.taskContext.workflowId,
-                "taskType": context.taskType
+                "taskType": context.taskType,
+                "comment": data.comment
               }),
               contentType: 'application/json',
               success: function (response) {
