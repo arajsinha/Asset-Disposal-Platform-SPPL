@@ -14,13 +14,24 @@ grant_type=client_credentials&client_id={{clientid}}&client_secret={{clientsecre
 @oauth_token = {{postLogin.response.body.access_token}}
 
 ### Create the repository
+POST https://api-sdm-di.cfapps.eu10.hana.ondemand.com/rest/v2/repositories
+Authorization: Bearer {{oauth_token}}
+Content-Type: application/json
 
+{
+    "repository": {
+        "displayName": "SPPL_REPO_MP1",
+        "description": "Test MP",
+        "repositoryType": "internal",
+        "isVersionEnabled":"false"
+    }
+}
 
 ### All repo browser
 GET https://api-sdm-di.cfapps.eu10.hana.ondemand.com/browser
 Authorization: Bearer {{oauth_token}}
 
 ### Single Repo Browser
-@repo = 999bd158-197f-4798-8bf6-434795ea703f
-GET https://api-sdm-di.cfapps.eu10.hana.ondemand.com/browser/{{repo}}?cmisselector=repositoryInfo
+@repo = 3d765260-6a8b-46a5-a297-b361aac9136e
+DELETE https://api-sdm-di.cfapps.eu10.hana.ondemand.com/browser/{{repo}}?cmisselector=repositoryInfo
 Authorization: Bearer {{oauth_token}}
