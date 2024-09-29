@@ -106,7 +106,7 @@ sap.ui.define(
         },
 
         _getPath: function () {
-          return "";
+          // return "";
           var ui5CloudService = this.getManifestEntry("/sap.cloud/service").replaceAll(".", "")
           var ui5ApplicationName = this.getManifestEntry("/sap.app/id").replaceAll(".", "");
           var appPath = `${ui5CloudService}.${ui5ApplicationName}`;
