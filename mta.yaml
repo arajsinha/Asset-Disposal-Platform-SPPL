@@ -10,6 +10,7 @@ modules:
       - name: asset-disposal-auth
       - name: asset-disposal-singaporepools-db
       - name: asset-disposal-singaporepools-destination
+      - name: sdm-di-instance
     provides:
       - name: srv-api
         properties:
@@ -151,6 +152,11 @@ resources:
     parameters:
       service: html5-apps-repo
       service-plan: app-runtime
+  - name: sdm-di-instance
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service: sdm
+      service-plan: standard
 parameters:
   deploy_mode: html5-repo
   enable-parallel-deployments: true
