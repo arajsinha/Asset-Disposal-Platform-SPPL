@@ -6,6 +6,7 @@ type auditTrailType : {
   taskType   : String(100);
   taskTitle  : String(100);
   workflowId : String(100);
+  comment    : String(200);
 };
 
 service AssetDisposalTaskUI {
@@ -18,7 +19,8 @@ service AssetDisposalTaskUI {
                            taskName : auditTrailType:taskName @mandatory,
                            taskType : auditTrailType:taskType @mandatory,
                            taskTitle : auditTrailType:taskID @mandatory,
-                           workflowId : auditTrailType:taskID @mandatory );
+                           workflowId : auditTrailType:taskID @mandatory,
+                           comment  : auditTrailType:comment );
     }
 
   @readonly

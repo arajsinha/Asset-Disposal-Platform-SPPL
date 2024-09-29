@@ -27,6 +27,7 @@ module.exports = class AssetDisposalTaskUI extends cds.ApplicationService {
                     subject: req.data.taskTitle,
                     timestamp: new Date,
                     approver: req.user.attr.email,
+                    comment: req.data.comment,
                     approverName: `${req.user.attr.givenName} ${req.user.attr.familyName}`
                 }
             )

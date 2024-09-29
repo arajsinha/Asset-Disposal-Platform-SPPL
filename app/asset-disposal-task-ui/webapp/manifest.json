@@ -170,18 +170,8 @@
                     "description": "",
                     "type": "string"
                 },
-                "canComment": {
-                    "title": "Can comment?",
-                    "description": "",
-                    "type": "string"
-                },
                 "canVoid": {
                     "title": "Can void?",
-                    "description": "",
-                    "type": "string"
-                },
-                "canVoidAtAnyStep": {
-                    "title": "Can void at any workflow stage?",
                     "description": "",
                     "type": "string"
                 }

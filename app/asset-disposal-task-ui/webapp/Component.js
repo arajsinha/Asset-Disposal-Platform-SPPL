@@ -106,7 +106,7 @@ sap.ui.define(
         },
 
         _getPath: function () {
-          return "";
+          // return "";
           var ui5CloudService = this.getManifestEntry("/sap.cloud/service").replaceAll(".", "")
           var ui5ApplicationName = this.getManifestEntry("/sap.app/id").replaceAll(".", "");
           var appPath = `${ui5CloudService}.${ui5ApplicationName}`;
@@ -187,7 +187,7 @@ sap.ui.define(
         updateAuditTrial: function () {
           let context = this.getContext();
           let requestId = context.requestId;
-
+          let data = this.getModel("approvalModel").getData();
           const path = this._getPath();
           return new Promise(function (resolve, reject) {
             $.ajax({
@@ -203,7 +203,8 @@ sap.ui.define(
                 "taskName": context.taskData.TaskDefinitionName,
                 "taskTitle": context.taskData.TaskTitle,
                 "workflowId": context.taskContext.workflowId,
-                "taskType": context.taskType
+                "taskType": context.taskType,
+                "comment": data.comment
               }),
               contentType: 'application/json',
               success: function (response) {
