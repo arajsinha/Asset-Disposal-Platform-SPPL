@@ -21,14 +21,15 @@ Content-Type: application/json
 Accept: application/json
 
 {
-  "requestId"  : "1",
-  "taskID"     : "2",
-  "taskName"   : "3",
-  "taskTitle"  : "4",
-  "workflowId" : "5"
+  "requestId"  : "d3340187-0be9-4f32-ab21-02b667326500",
+  "taskID"     : "d3340187-0be9-4f32-ab21-02b667326500",
+  "taskName"   : "Test",
+  "taskType"   : "Approved by",
+  "taskTitle"  : "Test Title",
+  "workflowId" : "d3340187-0be9-4f32-ab21-02b667326500"
 }
 
-### Call AudiTrail Data
+### Call AudiTrail Data   
 GET http://localhost:4004/odata/v4/asset-disposal-task-ui/RequestDetails(ID={{requestId}})/AuditTrail
 
 
