@@ -63,6 +63,7 @@ entity AuditTrail : cuid, managed {
     approver        : String(100) @title: 'Approver Email';
     approverName    : String(100) @title: 'Approver Name';
     comment         : String(200) @title: 'Comment';
+    status          : String(20) @title: 'Status';
     workflows       : Association to Workflows; // Connects to RequestDetails entity
     requestDetails  : Association to RequestDetails; // Connects to RequestDetails entity
 }

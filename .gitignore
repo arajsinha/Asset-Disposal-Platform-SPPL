@@ -39,3 +39,5 @@ mta_archives/
 .cdsrc-private.json
 
 .gitignore
+# added by cds
+.cdsrc-private.json
