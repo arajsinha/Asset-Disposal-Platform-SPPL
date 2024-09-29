@@ -1,10 +1,11 @@
 sap.ui.define([
-  "sap/ui/core/mvc/Controller"
+  "sap/ui/core/mvc/Controller",
+  "sap/m/GroupHeaderListItem"
 ],
   /**
    * @param {typeof sap.ui.core.mvc.Controller} Controller
    */
-  function (Controller) {
+  function (Controller, GroupHeaderListItem) {
     "use strict";
 
     return Controller.extend("assetdisposaltaskui.controller.GenericTaskUI", {
@@ -47,6 +48,20 @@ sap.ui.define([
       },
       addAuditTrailDymmy: function(){
         this.getOwnerComponent().updateAuditTrial();
+      },
+      approve: function(){
+        this.getOwnerComponent().approvalConfirmation("Approve", function(){this.getOwnerComponent().completeTask(false, "approve")}.bind(this));
+      },
+      reject: function(){
+        this.getOwnerComponent().approvalConfirmation("Reject", function(){this.getOwnerComponent().completeTask(false, "reject")}.bind(this));
+      },
+      getTaskType: function(oContext){
+        return oContext.getProperty('taskType');
+      },
+      getGroupHeader: function(oGroup){
+        return new GroupHeaderListItem({
+          title : oGroup.key
+        });
       }
     });
   });

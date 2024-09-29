@@ -3,8 +3,12 @@ sap.ui.define(
     "sap/ui/core/UIComponent",
     "sap/ui/Device",
     "assetdisposaltaskui/model/models",
+    "sap/m/Dialog",
+    "sap/m/TextArea",
+    "sap/m/Button",
+    "sap/m/MessageBox"
   ],
-  function (UIComponent, Device, models) {
+  function (UIComponent, Device, models, Dialog, TextArea, Button, MessageBox) {
     "use strict";
 
     return UIComponent.extend(
@@ -13,6 +17,7 @@ sap.ui.define(
         metadata: {
           manifest: "json",
         },
+        approvalDialog: null,
 
         /**
          * The component is initialized by UI5 automatically during the startup of the app and calls the init method once.
@@ -28,6 +33,9 @@ sap.ui.define(
 
           // set the device model
           this.setModel(models.createDeviceModel(), "device");
+
+          this.setModel(new sap.ui.model.json.JSONModel({ "comment": "test" }), "approvalModel");
+
           if (!this.getComponentData()?.startupParameters?.taskModel) {
             return;
           }
@@ -41,8 +49,8 @@ sap.ui.define(
               type: "reject",
             },
             function () {
-              this.completeTask(false, rejectOutcomeId);
-            },
+              this.approvalConfirmation("Reject", function () { this.completeTask(false, rejectOutcomeId) }.bind(this));
+            }.bind(this),
             this
           );
           const approveOutcomeId = "approve";
@@ -53,8 +61,8 @@ sap.ui.define(
               type: "accept",
             },
             function () {
-              this.completeTask(true, approveOutcomeId);
-            },
+              this.approvalConfirmation("Approve", function () { this.completeTask(true, approveOutcomeId) }.bind(this));
+            }.bind(this),
             this
           );
         },
@@ -122,9 +130,22 @@ sap.ui.define(
 
         _patchTaskInstance: function (outcomeId) {
           const context = this.getModel("context").getData();
+          const approvalData = this.getModel("approvalModel").getData();
+          const path = this._getPath();
+          let approver = "";
+          jQuery.ajax({
+            url: `${path}/user-api/currentUser`,
+            method: "GET",
+            contentType: "application/json",
+            async: false,
+            success(result, xhr, data) {
+              approver = result.email;
+            }
+          });
+
           var data = {
             status: "COMPLETED",
-            context: { ...context, comment: context.comment || '' },
+            context: { ...context, comment: approvalData.comment || '', approver: approver },
             decision: outcomeId
           };
 
@@ -181,7 +202,8 @@ sap.ui.define(
                 "taskID": context.taskData.InstanceID,
                 "taskName": context.taskData.TaskDefinitionName,
                 "taskTitle": context.taskData.TaskTitle,
-                "workflowId": context.taskContext.workflowId
+                "workflowId": context.taskContext.workflowId,
+                "taskType": context.taskType
               }),
               contentType: 'application/json',
               success: function (response) {
@@ -207,12 +229,12 @@ sap.ui.define(
           } else {
             context.requestId = "d3340187-0be9-4f32-ab21-02b667326500";//testing purpose
             context.taskData = {};
-            context.taskData.InstanceID = "1";
-            context.taskData.TaskDefinitionName = "2";
-            context.taskData.TaskTitle = "3";
+            context.taskData.InstanceID = "f66208be-4d06-4f5b-8f03-636b9586d7a9";
+            context.taskData.TaskDefinitionName = "Verified By Approval";
+            context.taskData.TaskTitle = "Please approve the Task";
             context.taskContext = {};
-            context.taskContext.workflowId = "4";
-
+            context.taskContext.workflowId = "f66208be-4d06-4f5b-8f03-636b9586d7a9";
+            context.taskType = "Verified by";
           }
           return context;
         },
@@ -234,6 +256,52 @@ sap.ui.define(
           });
           return fetchedToken;
         },
+        approvalConfirmation: function (type, action) {
+          this.getModel("approvalModel").setProperty("/type", type);
+          this.approvalAction = action;
+          if (!this.approvalDialog) {
+            this.approvalDialog = new Dialog({
+              title: "Would you like to " + "{approvalModel>/type}" + " ?",
+              content: [
+                new TextArea({
+                  value: "{approvalModel>/comment}",
+                  width: "100%",
+                  placeholder: "Enter your comment here...",
+                  growing: true
+                })
+              ],
+              buttons: [
+                new Button({
+                  text: "Ok",
+                  press: function () {
+                    let data = this.getModel("approvalModel").getData();
+                    if (data.comment && data.type === "Reject" || data.type === "Approve") {
+                      this.approvalAction();
+                      this.approvalDialog.close();
+                    } else if (!data.comment && data.type === "Reject") {
+                      MessageBox.error(
+                        "Please enter the comment", {
+                        title: "Error",
+                        actions: [MessageBox.Action.OK],
+                        emphasizedAction: MessageBox.Action.OK
+                      }
+                      );
+                    }
+                  }.bind(this)
+                }),
+                new Button({
+                  text: "Cancel",
+                  press: function () {
+                    this.approvalDialog.close();
+                  }.bind(this)
+                })
+              ]
+            }).addStyleClass("sapUiResponsiveContentPadding");
+            this.approvalDialog.setModel(this.getModel("approvalModel"), "approvalModel")
+          }
+          this.getModel("approvalModel").setProperty("/comment", "");
+          this.approvalDialog.open();
+        }
       }
     );
   }

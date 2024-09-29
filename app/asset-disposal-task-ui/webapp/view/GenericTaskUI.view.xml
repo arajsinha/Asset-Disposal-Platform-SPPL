@@ -33,12 +33,24 @@
 
                     <Label text="Total Purchase Cost" />
                     <Text text="{totalPurchaseCost}" />
-                    <Button text="Audit Trail" press=".addAuditTrailDymmy"></Button>
+                    <Button
+                        text="Audit Trail"
+                        press=".addAuditTrailDymmy"
+                    />
+                    <Button
+                        text="Approve"
+                        press=".approve"
+                    />
+                    <Button
+                        text="Reject"
+                        press=".reject"
+                    />
                 </f:content>
             </f:SimpleForm>
 
             <Table
                 id="idProductsTable"
+                class="sapUiMediumMarginTop"
                 autoPopinMode="true"
                 contextualWidth="Auto"
                 items="{
@@ -80,6 +92,54 @@
 							}"
                                 unit="{Currency}"
                             />
+                        </cells>
+                    </ColumnListItem>
+                </items>
+            </Table>
+
+            <Table
+                id="approvals"
+                class="sapUiMediumMarginTop"
+                autoPopinMode="true"
+                contextualWidth="Auto"
+                items="{
+			path: 'AuditTrail',
+            parameters : {
+                $select : 'taskType'
+            },
+            sorter: { path: 'taskType', descending: false, group: '.getTaskType'},
+            groupHeaderFactory: '.getGroupHeader'
+		}"
+            >
+                <headerToolbar>
+                    <OverflowToolbar>
+                        <content>
+                            <Title
+                                text="Approvals"
+                                level="H2"
+                            />
+                            <ToolbarSpacer />
+                        </content>
+                    </OverflowToolbar>
+                </headerToolbar>
+                <columns>
+
+                    <Column width="auto">
+                        <Text text="Approver" />
+                    </Column>
+                    <Column width="auto">
+                        <Text text="Appoval Time" />
+                    </Column>
+                    <Column width="auto">
+                        <Text text="Comment" />
+                    </Column>
+                </columns>
+                <items>
+                    <ColumnListItem vAlign="Middle">
+                        <cells>
+                            <Text text="{approverName}" />
+                            <Text text="{timestamp}" />
+                            <Text text="{comment}" />
                         </cells>
                     </ColumnListItem>
                 </items>

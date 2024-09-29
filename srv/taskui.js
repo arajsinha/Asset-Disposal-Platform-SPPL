@@ -15,14 +15,15 @@ module.exports = class AssetDisposalTaskUI extends cds.ApplicationService {
 
         this.on("addAuditTrial", "RequestDetails", async (req) => {
             // console.log(req.data)
-            console.log(req.user);
-            return;
+            // console.log(req.user);
+            // return;
             await INSERT.into(AuditTrail).entries(
                 {
                     workflows_ID: req.data.workflowId,
                     requestDetails_ID: req.data.requestId,
                     taskID: req.data.taskID,
                     taskDescription: req.data.taskName,
+                    taskType: req.data.taskType,
                     subject: req.data.taskTitle,
                     timestamp: new Date,
                     approver: req.user.attr.email,

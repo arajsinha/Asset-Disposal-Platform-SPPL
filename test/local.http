@@ -11,7 +11,8 @@ GET http://localhost:4004/odata/v4/asset-disposal-task-ui/$metadata
 ### Read Requests
 GET http://localhost:4004/odata/v4/asset-disposal-task-ui/RequestDetails
 
-### Call Single Request V2
+### Call Single Request
+
 GET http://localhost:4004/odata/v4/asset-disposal-task-ui/RequestDetails(ID={{requestId}})
 
 ### Call Audit Trail Action
@@ -26,6 +27,10 @@ Accept: application/json
   "taskTitle"  : "4",
   "workflowId" : "5"
 }
+
+### Call AudiTrail Data
+GET http://localhost:4004/odata/v4/asset-disposal-task-ui/RequestDetails(ID={{requestId}})/AuditTrail
+
 
 ### Call Void
 POST http://localhost:4004/odata/v4/asset-disposal-task-ui/RequestDetails(ID={{requestId}})/AssetDisposalTaskUI.void

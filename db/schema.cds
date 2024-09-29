@@ -56,11 +56,13 @@ entity AssetDetails : cuid, managed {
 
 entity AuditTrail : cuid, managed {
     taskID          : String(100);
-    taskDescription : String(100);
+    taskDescription : String(100); // From workflow
+    taskType        : String(100); // Task Type configured by the end user: Verified by, Approved by ..,
     timestamp       : Timestamp;
-    subject         : String;
-    approver        : String;
-    approverName    : String;
+    subject         : String(200); // From workflow
+    approver        : String(100);
+    approverName    : String(100);
+    comment         : String(200);
     workflows       : Association to Workflows; // Connects to RequestDetails entity
     requestDetails  : Association to RequestDetails; // Connects to RequestDetails entity
 }
