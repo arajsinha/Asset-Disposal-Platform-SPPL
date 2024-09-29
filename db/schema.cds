@@ -11,14 +11,14 @@ using {YY1_FIXED_ASSET as fixedasset} from '../srv/external/YY1_FIXED_ASSET';
 entity YY1_FIXED_ASSETS_CC as projection on fixedasset.YY1_FIXED_ASSETS_CC;
 
 entity RequestDetails : cuid, managed {
-    date              : Date;
-    requestorName     : String(100);
-    departmentName    : String(100);
-    totalPurchaseCost : String(100);
+    date              : Date @title: 'Date';
+    requestorName     : String(100) @title: 'Requestor Name';
+    departmentName    : String(100) @title: 'Department Name';
+    totalPurchaseCost : String(100) @title: 'Total Purchase Cost';
     assetDetails      : Composition of many AssetDetails
                             on assetDetails.requestDetails = $self;
     objectId          : String(14);
-    RequestStatus     : Association to one RequestStatus;
+    RequestStatus     : Association to one RequestStatus @title: 'Request Status';
     AuditTrail        : Association to many AuditTrail
                             on AuditTrail.requestDetails = $self;
     workflows         : Composition of many Workflows
@@ -39,30 +39,30 @@ entity RequestStatus : CodeList {
 
 entity AssetDetails : cuid, managed {
     assetNumber       : String(19) @title: 'Asset Number';
-    subNumber         : String(6); 
-    costCenter        : String(12);
-    assetClass        : String(10);
-    assetDesc         : String(10);
-    assetPurchaseDate : Date;
-    assetPurchaseCost : Decimal(24, 3);
-    netBookValue      : Decimal(24, 3);
-    companyCode       : String(6);
-    reasonWriteOff    : String(100);
-    disposalMethod    : String(100);
-    scrapValue        : Decimal(24, 3);
+    subNumber         : String(6) @title: 'Sub No.'; 
+    costCenter        : String(12) @title: 'Cost Center';
+    assetClass        : String(10) @title: 'Asset Class';
+    assetDesc         : String(10) @title: 'Asset Description';
+    assetPurchaseDate : Date @title: 'Purchase Date';
+    assetPurchaseCost : Decimal(24, 3) @title: 'Purchase Cost';
+    netBookValue      : Decimal(24, 3) @title: 'Net Book Value';
+    companyCode       : String(6) @title: 'Company Code';
+    reasonWriteOff    : String(100) @title: 'Reason For Write Off';
+    disposalMethod    : String(100) @title: 'Disposal Method';
+    scrapValue        : Decimal(24, 3) @title: 'Salvage Value';
     requestDetails    : Association to one RequestDetails;
-    Currency          : String(5);
+    Currency          : String(5) @title: 'Currency';
 }
 
 entity AuditTrail : cuid, managed {
-    taskID          : String(100);
-    taskDescription : String(100); // From workflow
-    taskType        : String(100); // Task Type configured by the end user: Verified by, Approved by ..,
-    timestamp       : Timestamp;
-    subject         : String(200); // From workflow
-    approver        : String(100);
-    approverName    : String(100);
-    comment         : String(200);
+    taskID          : String(100) @title: 'Task ID';
+    taskDescription : String(100) @title: 'Task Description'; // From workflow
+    taskType        : String(100) @title: 'Task Type'; // Task Type configured by the end user: Verified by, Approved by ..,
+    timestamp       : Timestamp @title: 'Timestamp';
+    subject         : String(200) @title: 'Subject'; // From workflow
+    approver        : String(100) @title: 'Approver Email';
+    approverName    : String(100) @title: 'Approver Name';
+    comment         : String(200) @title: 'Comment';
     workflows       : Association to Workflows; // Connects to RequestDetails entity
     requestDetails  : Association to RequestDetails; // Connects to RequestDetails entity
 }

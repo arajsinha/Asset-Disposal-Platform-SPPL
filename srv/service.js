@@ -47,97 +47,76 @@ module.exports = class AssetDisposal extends cds.ApplicationService {
             req.data.date = new Date().toISOString().split('T')[0];
         });
 
-        this.after("READ", "RequestDetails", async (req, next) => {
-            console.log(req)
-            const approval = await cds.connect.to("spa-process-automation")
-            try {
-                let objectData = await SELECT.from(Workflows).where({ 'requestDetails_ID': req[0].ID });
-                // Loop through each objectData to get workflowID and make API calls
-                for (const workflow of objectData) {
-                    if (workflow.workflowID) {
-                        try {
-                            // Call the external API with the current workflowID
-                            let res = await approval.send({
-                                method: 'GET',
-                                path: '/workflow/rest/v1/workflow-instances/' + workflow.workflowID + '/execution-logs'
-                            });
+        // this.after("READ", "RequestDetails", async (req, next) => {
+        //     console.log(req)
+        //     const approval = await cds.connect.to("spa-process-automation")
+        //     try {
+        //         let objectData = await SELECT.from(Workflows).where({ 'requestDetails_ID': req[0].ID });
+        //         // Loop through each objectData to get workflowID and make API calls
+        //         for (const workflow of objectData) {
+        //             if (workflow.workflowID) {
+        //                 try {
+        //                     // Call the external API with the current workflowID
+        //                     let res = await approval.send({
+        //                         method: 'GET',
+        //                         path: '/workflow/rest/v1/workflow-instances/' + workflow.workflowID + '/execution-logs'
+        //                     });
 
-                            // Log the response from the API call
-                            console.log(`Workflow ID: ${workflow.workflowID}, Execution Logs:`, res);
-                            for (const task of res) {
-                                // Check if the task already exists in the AuditTrail
-                                const existingTask = await SELECT.one.from(AuditTrail).where({ taskID: task.id });
-                                if (!existingTask && task.type != 'WORKFLOW_STARTED' && task.type != 'EXCLUSIVE_GATEWAY_REACHED') {
-                                    let recipientsString = task.recipientUsers.join(', ');
-                                    let recipientsGroupString = task.recipientGroups.join(', ');
-                                    if (task.recipientGroups.length == 0) recipientsGroupString = ''
+        //                     // Log the response from the API call
+        //                     console.log(`Workflow ID: ${workflow.workflowID}, Execution Logs:`, res);
+        //                     for (const task of res) {
+        //                         // Check if the task already exists in the AuditTrail
+        //                         const existingTask = await SELECT.one.from(AuditTrail).where({ taskID: task.id });
+        //                         if (!existingTask && task.type != 'WORKFLOW_STARTED' && task.type != 'EXCLUSIVE_GATEWAY_REACHED') {
+        //                             let recipientsString = task.recipientUsers.join(', ');
+        //                             let recipientsGroupString = task.recipientGroups.join(', ');
+        //                             if (task.recipientGroups.length == 0) recipientsGroupString = ''
                                     
-                                    // #### -> We should remove this code right? ####
-                                    await INSERT.into(AuditTrail).entries({
-                                        taskID: task.id,
-                                        type: task.type,
-                                        timestamp: task.timestamp,
-                                        subject: task.subject,
-                                        // recipientUsers: recipientsString,
-                                        // recipientGroups: recipientsGroupString,
-                                        workflows_ID: workflow.workflowID,
-                                        requestDetails_ID: req[0].ID,
-                                    });
-                                }
-                            }
-                            // let data = await SELECT.from(AuditTrail);
-                        } catch (apiError) {
-                            console.log(`Error fetching execution logs for workflowID ${workflow.workflowID}:`, apiError);
-                        }
-                    }
-                }
-                // if (objectData[0].workflowID) {
-                //     let res = await approval.send({
-                //         method: 'GET', path: '/workflow/rest/v1/workflow-instances/' + objectData[0].workflowID + '/execution-logs'
-                //     })
-                //     console.log(res)
-                // }
-                // console.log(cancel)
-                // workflowID = res.id
-                // await UPDATE.entity(RequestDetails).set({'workflowID': res.id}).where({ 'objectID': req.objectID });
+        //                             // #### -> We should remove this code right? ####
+        //                             await INSERT.into(AuditTrail).entries({
+        //                                 taskID: task.id,
+        //                                 type: task.type,
+        //                                 timestamp: task.timestamp,
+        //                                 subject: task.subject,
+        //                                 // recipientUsers: recipientsString,
+        //                                 // recipientGroups: recipientsGroupString,
+        //                                 workflows_ID: workflow.workflowID,
+        //                                 requestDetails_ID: req[0].ID,
+        //                             });
+        //                         }
+        //                     }
+        //                     // let data = await SELECT.from(AuditTrail);
+        //                 } catch (apiError) {
+        //                     console.log(`Error fetching execution logs for workflowID ${workflow.workflowID}:`, apiError);
+        //                 }
+        //             }
+        //         }
+        //         // if (objectData[0].workflowID) {
+        //         //     let res = await approval.send({
+        //         //         method: 'GET', path: '/workflow/rest/v1/workflow-instances/' + objectData[0].workflowID + '/execution-logs'
+        //         //     })
+        //         //     console.log(res)
+        //         // }
+        //         // console.log(cancel)
+        //         // workflowID = res.id
+        //         // await UPDATE.entity(RequestDetails).set({'workflowID': res.id}).where({ 'objectID': req.objectID });
 
-            } catch (error) {
-                console.log(error)
-            }
-        })
+        //     } catch (error) {
+        //         console.log(error)
+        //     }
+        // })
 
         this.after("CREATE", "RequestDetails", async (req) => {
-            let obj = []
-            obj.push(req)
             let workflowContext = {}
-            workflowContext.date = obj[0].date;
-            workflowContext.requestorname = obj[0].requestorName;
-            workflowContext.departmentname = obj[0].departmentName;
-            workflowContext.totalpurchasecost = obj[0].totalPurchaseCost;
-            workflowContext.objectid = obj[0].objectId;
-            workflowContext.requeststatus = obj[0].RequestStatus_id;
-            workflowContext.assetdetails = obj[0].assetDetails.map(item => ({
-                assetClass: item.assetClass,
-                assetDesc: item.assetDesc !== null ? item.assetDesc : '',
-                assetNumber: item.assetNumber,
-                assetPurchaseCost: item.assetPurchaseCost,
-                assetPurchaseDate: item.assetPurchaseDate,
-                companyCode: item.companyCode,
-                costCenter: item.costCenter,
-                disposalMethod: item.disposalMethod,
-                netBookValue: item.netBookValue,
-                reasonWriteOff: item.reasonWriteOff,
-                scrapValue: item.scrapValue,
-                subNumber: item.subNumber,
-            }));
+            workflowContext.objectid = req.ID;
 
             // Calculate totalPurchaseCost based on the sum of all assetPurchaseCosts
-            workflowContext.totalpurchasecost = workflowContext.assetdetails.reduce((total, asset) => {
-                return total + asset.assetPurchaseCost;
-            }, 0);
-            req.totalPurchaseCost = workflowContext.assetdetails.reduce((total, asset) => {
-                return total + asset.assetPurchaseCost;
-            }, 0);
+            // workflowContext.totalpurchasecost = workflowContext.assetdetails.reduce((total, asset) => {
+            //     return total + asset.assetPurchaseCost;
+            // }, 0);
+            // req.totalPurchaseCost = workflowContext.assetdetails.reduce((total, asset) => {
+            //     return total + asset.assetPurchaseCost;
+            // }, 0);
 
             await UPDATE.entity(RequestDetails).set({ 'totalPurchaseCost': req.totalPurchaseCost }).where({ 'ID': req.ID });
 
@@ -159,8 +138,8 @@ module.exports = class AssetDisposal extends cds.ApplicationService {
                     workflowID: res.id,  // The new workflowID to be added
                     requestDetails_ID: req.ID  // Link it to the corresponding RequestDetails
                 });
-                let data = await SELECT.from(Workflows).where({ 'requestDetails_ID': req.ID });
-                console.log(res)
+                // let data = await SELECT.from(Workflows).where({ 'requestDetails_ID': req.ID });
+                // console.log(res)
             } catch (error) {
                 console.log(error)
             }
