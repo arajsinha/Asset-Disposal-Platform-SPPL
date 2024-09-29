@@ -17,7 +17,7 @@ entity RequestDetails : cuid, managed {
     totalPurchaseCost : String(100) @title: 'Total Purchase Cost';
     assetDetails      : Composition of many AssetDetails
                             on assetDetails.requestDetails = $self;
-    objectId          : String(14);
+    objectId          : String(14) @title: 'Request ID';
     RequestStatus     : Association to one RequestStatus @title: 'Request Status';
     AuditTrail        : Association to many AuditTrail
                             on AuditTrail.requestDetails = $self;

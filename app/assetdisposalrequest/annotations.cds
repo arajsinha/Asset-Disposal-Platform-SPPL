@@ -266,7 +266,7 @@ annotate service.AuditTrail with @(
         {
             $Type : 'UI.DataField',
             Value : taskType,
-            Label : 'taskType',
+            Label : 'Task Type',
         },
         {
             $Type : 'UI.DataField',
@@ -275,7 +275,7 @@ annotate service.AuditTrail with @(
         {
             $Type : 'UI.DataField',
             Value : approverName,
-            Label : 'approverName',
+            Label : 'Approver Name',
         },
         {
             $Type : 'UI.DataField',
@@ -285,7 +285,7 @@ annotate service.AuditTrail with @(
         {
             $Type : 'UI.DataField',
             Value : comment,
-            Label : 'comment',
+            Label : 'Comment',
         },
     ],
     UI.SelectionPresentationVariant #AuditTrail : {
