@@ -40,6 +40,7 @@ service AssetDisposal {
     TriggerAction   : 'AssetDisposal.sideEffectTriggerAction'
   }});
 
+  entity DisposalMethod as projection on spassets.DisposalMethod;
   @readonly entity AuditTrail          as projection on spassets.AuditTrail;
   @readonly entity Workflows           as projection on spassets.Workflows;
   @readonly entity YY1_FIXED_ASSETS_CC as projection on spassets.YY1_FIXED_ASSETS_CC;

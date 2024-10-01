@@ -37,6 +37,11 @@ entity RequestStatus : CodeList {
     key id : String(3);
 }
 
+entity DisposalMethod {
+    key ID: String(3);
+    method: String(25);
+}
+
 entity AssetDetails : cuid, managed {
     assetNumber       : String(19) @title: 'Asset Number';
     subNumber         : String(6) @title: 'Sub No.'; 

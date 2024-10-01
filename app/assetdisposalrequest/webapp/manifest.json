@@ -121,7 +121,8 @@
                     }
                   }
                 }
-              }
+              },
+              "initialLoad": "Enabled"
             }
           }
         },
@@ -153,9 +154,19 @@
                     },
                     "DataField::netBookValue": {
                       "width": "8%"
-                    },
-                    "DataField::disposalMethod": {
-                      "width": "8%"
+                    }
+                  },
+                  "tableSettings": {
+                    "type": "GridTable"
+                  }
+                },
+                "AuditTrail/@com.sap.vocabularies.UI.v1.LineItem#AuditTrail": {
+                  "tableSettings": {
+                    "type": "ResponsiveTable"
+                  },
+                  "columns": {
+                    "DataField::taskType": {
+                      "width": "10%"
                     }
                   }
                 }

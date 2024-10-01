@@ -33,11 +33,6 @@ annotate service.Departments with @(
     UI.LineItem : [
         {
             $Type : 'UI.DataField',
-            Value : ID,
-            Label : 'ID',
-        },
-        {
-            $Type : 'UI.DataField',
             Label : ' Department Name',
             Value : name,
         },

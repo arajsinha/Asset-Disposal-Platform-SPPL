@@ -121,9 +121,6 @@ annotate service.AssetDetails with @(
         },
         {
             $Type : 'UI.DataField',
-            Value : subNumber,
-        },{
-            $Type : 'UI.DataField',
             Value : assetClass,
         },
         {
@@ -145,6 +142,7 @@ annotate service.AssetDetails with @(
         },{
             $Type : 'UI.DataField',
             Value : disposalMethod,
+            Label : 'Proposed Method of Disposal',
         },{
             $Type : 'UI.DataField',
             Value : scrapValue,
@@ -279,13 +277,17 @@ annotate service.AuditTrail with @(
         },
         {
             $Type : 'UI.DataField',
+            Value : comment,
+            Label : 'Comment',
+        },
+        {
+            $Type : 'UI.DataField',
             Value : timestamp,
             @Common.FieldControl : #ReadOnly
         },
         {
             $Type : 'UI.DataField',
-            Value : comment,
-            Label : 'Comment',
+            Value : status,
         },
     ],
     UI.SelectionPresentationVariant #AuditTrail : {
@@ -380,5 +382,36 @@ annotate service.RequestDetails with {
 
 annotate service.RequestDetails with {
     totalPurchaseCost @Common.FieldControl : #ReadOnly
+};
+
+annotate service.AssetDetails with {
+    assetDesc @Common.FieldControl : #ReadOnly
+};
+
+annotate service.RequestDetails with {
+    requestorName @Common.FieldControl : #ReadOnly
+};
+
+annotate service.AssetDetails with {
+    scrapValue @Common.FieldControl : #Mandatory
+};
+
+annotate service.AssetDetails with {
+    disposalMethod @(
+        Common.FieldControl : #Mandatory,
+        Common.ValueList : {
+            $Type : 'Common.ValueListType',
+            CollectionPath : 'DisposalMethod',
+            Parameters : [
+                {
+                    $Type : 'Common.ValueListParameterInOut',
+                    LocalDataProperty : disposalMethod,
+                    ValueListProperty : 'method',
+                },
+            ],
+            Label : 'Disposal Method',
+        },
+        Common.ValueListWithFixedValues : true,
+    )
 };
 

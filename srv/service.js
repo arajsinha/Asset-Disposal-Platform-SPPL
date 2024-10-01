@@ -5,7 +5,7 @@ module.exports = class AssetDisposal extends cds.ApplicationService {
 
     async init() {
         console.log("Service JS Triggered")
-        const { RequestDetails, RequestStatus, AssetDetails, AuditTrail, Workflows, YY1_FIXED_ASSETS_CC } = this.entities;
+        const { RequestDetails, RequestStatus, AssetDetails, AuditTrail, Workflows, YY1_FIXED_ASSETS_CC, Departments, Users } = this.entities;
         const logger = cds.log('srv');
 
         let obj = []
@@ -14,16 +14,45 @@ module.exports = class AssetDisposal extends cds.ApplicationService {
         const fixa = await cds.connect.to('YY1_FIXED_ASSET');
 
         this.on('READ', 'YY1_FIXED_ASSETS_CC', async req => {
-            let ans = fixa.run(req.query);
+            let ans = await fixa.run(req.query);
             console.log(ans)
             return ans;
         });
 
+        this.on('READ', 'Departments', async (req) => {
+            console.log('Depts');
+
+            try {
+                // Make the request using fetch
+                // let data = await SELECT.from(Departments).columns(r=>{r`.*`,r.users(asi=>{asi`.*`}) }).where({ID:'38a13fed-f2d1-45bd-91ec-642053889c92'});
+
+                let data = await SELECT.from `${Departments}[users.email='aryan.raj.sinha@sap.com']`
+                    // .columns(r => {
+                    //     r`.*`,
+                    //         r.users`[email = 'aryan.raj.sinha@sap.com']`(ami => { ami`.*` })
+                    // })
+
+                // let data = await cds.run(cds.parse.cql(`SELECT FROM ${Departments} {name} WHERE EXISTS ${Users}[email = 'aryan.raj.sinha@sap.com']`));
+
+                // Log the data
+                console.log(data);
+                return data;
+            } catch (error) {
+                console.error('Error fetching departments:', error);
+            }
+        });
+
+
+
         this.on('sideEffectTriggerAction', "AssetDetails.drafts", async (req) => {
             console.log("Hit it")
             // 100001
-            // let assetData = fixa.run(SELECT.from(YY1_FIXED_ASSETS_CC).where({'FixedAssetExternalID':'100001-0'}));
-            // console.log(assetData)
+            let ans = await SELECT.one.from(AssetDetails.drafts).where({ 'ID': req.params[1].ID })
+            console.log(ans)
+            let assetData = await fixa.run(SELECT.one.from(YY1_FIXED_ASSETS_CC).where({ 'FixedAssetExternalID': ans.assetNumber }));
+            await UPDATE.entity(AssetDetails.drafts).set({ 'subNumber': assetData.FixedAsset, 'assetClass': assetData.AssetClass, 'costCenter': assetData.CostCenter, 'assetPurchaseDate': assetData.AcquisitionValueDate, 'companyCode': assetData.CompanyCode }).where({ 'ID': req.params[1].ID });
+            //pass all key fields, it is a bug for getting duplicate entries
+            console.log(assetData)
         })
 
         this.before("CREATE", "RequestDetails", async (req) => {
@@ -45,6 +74,10 @@ module.exports = class AssetDisposal extends cds.ApplicationService {
             req.data.objectId = '0000' + '$';
             req.data.RequestStatus_id = "new";
             req.data.date = new Date().toISOString().split('T')[0];
+            req.data.requestorName = (req.user.attr.givenName) + " " + (req.user.attr.familyName)
+            console.log((req.user.attr.givenName) + " " + (req.user.attr.familyName))
+            // await UPDATE.entity(RequestDetails).set({ 'requestorName': (req.user.attr.givenName) + (req.user.attr.familyName) }).where({ 'ID': req.ID });
+            // req.user.id
         });
 
         // this.after("READ", "RequestDetails", async (req, next) => {
@@ -71,7 +104,7 @@ module.exports = class AssetDisposal extends cds.ApplicationService {
         //                             let recipientsString = task.recipientUsers.join(', ');
         //                             let recipientsGroupString = task.recipientGroups.join(', ');
         //                             if (task.recipientGroups.length == 0) recipientsGroupString = ''
-                                    
+
         //                             // #### -> We should remove this code right? ####
         //                             await INSERT.into(AuditTrail).entries({
         //                                 taskID: task.id,
