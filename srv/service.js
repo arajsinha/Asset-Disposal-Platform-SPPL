@@ -19,20 +19,17 @@ module.exports = class AssetDisposal extends cds.ApplicationService {
             return ans;
         });
 
-        this.on('READ', 'Departments', async (req) => {
+        this.on('READ', 'AssetDisposal.Departments', async (req) => {
             console.log('Depts');
 
             try {
-                // Make the request using fetch
-                // let data = await SELECT.from(Departments).columns(r=>{r`.*`,r.users(asi=>{asi`.*`}) }).where({ID:'38a13fed-f2d1-45bd-91ec-642053889c92'});
 
-                let data = await SELECT.from `${Departments}[users.email='aryan.raj.sinha@sap.com']`
-                    // .columns(r => {
-                    //     r`.*`,
-                    //         r.users`[email = 'aryan.raj.sinha@sap.com']`(ami => { ami`.*` })
-                    // })
-
-                // let data = await cds.run(cds.parse.cql(`SELECT FROM ${Departments} {name} WHERE EXISTS ${Users}[email = 'aryan.raj.sinha@sap.com']`));
+                let data = await SELECT.from(Departments)
+                    .columns(r => {
+                        r`.*`,
+                            r.users`.*`
+                    })
+                    .where(`users.email = 'aryan.raj.sinha@sap.com'`);
 
                 // Log the data
                 console.log(data);

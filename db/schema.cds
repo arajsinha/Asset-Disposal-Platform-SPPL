@@ -1,6 +1,7 @@
 namespace spassets;
 
-using {Attachments} from '@cap-js/sdm';
+// using {Attachments} from '@cap-js/sdm';
+using { Attachments } from '@cap-js/attachments';
 using {
     sap.common.CodeList,
     cuid,

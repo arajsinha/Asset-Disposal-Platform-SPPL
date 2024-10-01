@@ -7,8 +7,8 @@
   "private": true,
   "dependencies": {
     "@cap-js-community/odata-v2-adapter": "^1.13.3",
+    "@cap-js/attachments": "^1.1.6",
     "@cap-js/hana": "^1.2.0",
-    "@cap-js/sdm": "^1.2.0",
     "@sap-cloud-sdk/http-client": "^3.21.0",
     "@sap-cloud-sdk/resilience": "^3.18.0",
     "@sap-cloud-sdk/util": "^3.21.0",
@@ -45,11 +45,6 @@
       "destinations": true,
       "html5-repo": true,
       "db": "hana",
-      "sdm": {
-        "settings": {
-          "repositoryId": "999bd158-197f-4798-8bf6-434795ea703f"
-        }
-      },
       "spa-process-automation": {
         "kind": "rest",
         "credentials": {

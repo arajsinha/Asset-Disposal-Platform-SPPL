@@ -59,6 +59,21 @@
         "vcap": {
           "name": "auth"
         }
+      },
+      "objectstore": {
+        "binding": {
+          "type": "cf",
+          "apiEndpoint": "https://api.cf.eu10-004.hana.ondemand.com",
+          "org": "Technical Field Enablement_sap-process-automation-tfe",
+          "space": "DEV",
+          "instance": "object-store-aws",
+          "key": "object-store-aws-key",
+          "resolved": false
+        },
+        "kind": "s3",
+        "vcap": {
+          "name": "objectstore"
+        }
       }
     }
   }
