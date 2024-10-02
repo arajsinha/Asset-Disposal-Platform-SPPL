@@ -41,11 +41,35 @@ module.exports = class AssetDisposal extends cds.ApplicationService {
 
         this.on('READ', 'DepartmentAssets', async (req) => {
             let departmentId;
-            if(req.query.SELECT.where?.[0].ref?.[0] === "department"){
+            if (req.query.SELECT.where?.[0].ref?.[0] === "department") {
                 departmentId = req.query.SELECT.where?.[2].val;
             }
-            console.log(req.query);
-            return [];
+            let data = await SELECT.from(Departments)
+                .columns(r => {
+                    r`.*`,
+                        r.costCenters(cc => { cc`.*` })
+                }).where({ ID: departmentId })
+            const costCentersArray = data[0].costCenters.map(center => center.costCenter);
+
+            // let assetDataCount = await fixa.run(
+            //     SELECT.from(YY1_FIXED_ASSETS_CC)
+            //     .columns(`count(*) as totalrows`)
+            //         .where({
+            //             'CostCenter': { in: costCentersArray },
+            //             'ValidityEndDate': '9999-12-31' // Additional AND condition
+            //         })
+            // );
+            let assetData = await fixa.run(
+                SELECT.from(YY1_FIXED_ASSETS_CC)
+                    .where({
+                        'CostCenter': { in: costCentersArray },
+                        'ValidityEndDate': '9999-12-31' // Additional AND condition
+                    })
+                    // .limit(req.query.SELECT.limit.offset.val, req.query.SELECT.limit.rows.val)
+            );
+            const finalAssetData = assetData.map((center) => { return { assetNumber: center.FixedAssetExternalID, costCenter: center.CostCenter } });
+            // console.log(req.query);
+            return finalAssetData;
         });
 
         this.on('sideEffectTriggerAction', "AssetDetails.drafts", async (req) => {
@@ -54,7 +78,7 @@ module.exports = class AssetDisposal extends cds.ApplicationService {
             let ans = await SELECT.one.from(AssetDetails.drafts).where({ 'ID': req.params[1].ID })
             console.log(ans)
             let assetData = await fixa.run(SELECT.one.from(YY1_FIXED_ASSETS_CC).where({ 'FixedAssetExternalID': ans.assetNumber }));
-            await UPDATE.entity(AssetDetails.drafts).set({ 'subNumber': assetData.FixedAsset, 'assetClass': assetData.AssetClass, 'costCenter': assetData.CostCenter, 'assetPurchaseDate': assetData.AcquisitionValueDate, 'companyCode': assetData.CompanyCode }).where({ 'ID': req.params[1].ID });
+            await UPDATE.entity(AssetDetails.drafts).set({ 'subNumber': assetData.FixedAsset, 'assetClass': assetData.AssetClass, 'costCenter': assetData.CostCenter, 'assetPurchaseDate': assetData.AcquisitionValueDate, 'companyCode': assetData.CompanyCode, 'assetDesc': assetData.FixedAssetDescription }).where({ 'ID': req.params[1].ID });
             //pass all key fields, it is a bug for getting duplicate entries
             console.log(assetData)
         })

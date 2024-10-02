@@ -137,9 +137,6 @@
               "controlConfiguration": {
                 "assetDetails/@com.sap.vocabularies.UI.v1.LineItem#Assets": {
                   "columns": {
-                    "DataField::requestDetails::assetDetails::assetDesc": {
-                      "width": "20%"
-                    },
                     "DataField::subNumber": {
                       "width": "5%"
                     },

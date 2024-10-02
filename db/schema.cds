@@ -51,7 +51,7 @@ entity AssetDetails : cuid, managed {
     subNumber         : String(6) @title: 'Sub No.'; 
     costCenter        : String(12) @title: 'Cost Center';
     assetClass        : String(10) @title: 'Asset Class';
-    assetDesc         : String(10) @title: 'Asset Description';
+    assetDesc         : String(50) @title: 'Asset Description';
     assetPurchaseDate : Date @title: 'Purchase Date';
     assetPurchaseCost : Decimal(24, 3) @title: 'Purchase Cost';
     netBookValue      : Decimal(24, 3) @title: 'Net Book Value';
