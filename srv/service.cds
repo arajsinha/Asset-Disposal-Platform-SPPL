@@ -16,7 +16,7 @@ service AssetDisposal {
   @odata.draft.enabled
   entity RequestDetails      as projection on spassets.RequestDetails
     actions {
-      action withdraw() ;
+      action withdraw();
     }
 
   // @odata.draft.enabled
@@ -40,10 +40,23 @@ service AssetDisposal {
     TriggerAction   : 'AssetDisposal.sideEffectTriggerAction'
   }});
 
-  entity DisposalMethod as projection on spassets.DisposalMethod;
-  @readonly entity AuditTrail          as projection on spassets.AuditTrail;
-  @readonly entity Workflows           as projection on spassets.Workflows;
-  @readonly entity YY1_FIXED_ASSETS_CC as projection on spassets.YY1_FIXED_ASSETS_CC;
-  @readonly entity Departments         as projection on deptassets.Departments;
-  @readonly entity CostCenters         as projection on deptassets.CostCenters;
+  entity DisposalMethod      as projection on spassets.DisposalMethod;
+
+  @readonly
+  entity AuditTrail          as projection on spassets.AuditTrail;
+
+  @readonly
+  entity Workflows           as projection on spassets.Workflows;
+
+  @readonly
+  entity YY1_FIXED_ASSETS_CC as projection on spassets.YY1_FIXED_ASSETS_CC;
+
+  @readonly
+  entity Departments         as projection on deptassets.Departments;
+
+  @readonly
+  entity CostCenters         as projection on deptassets.CostCenters;
+
+  @readonly
+  entity DepartmentAssets    as projection on spassets.DepartmentAssets;
 }

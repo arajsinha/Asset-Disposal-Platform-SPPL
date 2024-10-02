@@ -42,7 +42,7 @@ annotate service.RequestDetails with @(
             },
             {
                 $Type : 'UI.DataField',
-                Value : departmentName,
+                Value : department_ID,
             },
             {
                 $Type : 'UI.DataField',
@@ -142,7 +142,6 @@ annotate service.AssetDetails with @(
         },{
             $Type : 'UI.DataField',
             Value : disposalMethod,
-            Label : 'Proposed Method of Disposal',
         },{
             $Type : 'UI.DataField',
             Value : scrapValue,
@@ -162,24 +161,6 @@ annotate service.RequestDetails with @(
         },
     }
 );
-annotate service.AssetDetails with {
-    assetNumber @(
-        Common.FieldControl : #Mandatory,
-        Common.ValueList : {
-            $Type : 'Common.ValueListType',
-            CollectionPath : 'YY1_FIXED_ASSETS_CC',
-            Parameters : [
-                {
-                    $Type : 'Common.ValueListParameterInOut',
-                    LocalDataProperty : assetNumber,
-                    ValueListProperty : 'FixedAssetExternalID',
-                },
-            ],
-            Label : 'Asset Number',
-        },
-        Common.ValueListWithFixedValues : false,
-    )
-};
 annotate service.AssetDetails with {
     reasonWriteOff @Common.FieldControl : #Mandatory
 };
@@ -361,22 +342,6 @@ annotate service.AssetDetails with {
 };
 
 annotate service.RequestDetails with {
-    departmentName @(Common.ValueList : {
-            $Type : 'Common.ValueListType',
-            CollectionPath : 'Departments',
-            Parameters : [
-                {
-                    $Type : 'Common.ValueListParameterInOut',
-                    LocalDataProperty : departmentName,
-                    ValueListProperty : 'name',
-                },
-            ],
-            Label : 'Department Name',
-        },
-        Common.ValueListWithFixedValues : false
-)};
-
-annotate service.RequestDetails with {
     RequestStatus @Common.FieldControl : #ReadOnly
 };
 
@@ -413,5 +378,61 @@ annotate service.AssetDetails with {
         },
         Common.ValueListWithFixedValues : true,
     )
+};
+
+annotate service.AssetDetails with {
+    assetNumber @(
+        Common.ValueList : {
+            $Type : 'Common.ValueListType',
+            CollectionPath : 'DepartmentAssets',
+            Parameters : [
+                {
+                    $Type : 'Common.ValueListParameterInOut',
+                    LocalDataProperty : assetNumber,
+                    ValueListProperty : 'assetNumber',
+                },
+                {
+                    $Type : 'Common.ValueListParameterIn',
+                    ValueListProperty : 'department',
+                    LocalDataProperty : requestDetails.department_ID,
+                },
+                {
+                    $Type : 'Common.ValueListParameterDisplayOnly',
+                    ValueListProperty : 'costCenter',
+                },
+            ],
+            Label : 'Asset number from Department Cost Centers',
+        },
+        Common.ValueListWithFixedValues : false,
+    )
+};
+
+annotate service.RequestDetails with {
+    department @(
+        Common.Text : {
+            $value : department.name,
+            ![@UI.TextArrangement] : #TextOnly
+        },
+        Common.ValueList : {
+            $Type : 'Common.ValueListType',
+            CollectionPath : 'Departments',
+            Parameters : [
+                {
+                    $Type : 'Common.ValueListParameterInOut',
+                    LocalDataProperty : department_ID,
+                    ValueListProperty : 'ID',
+                },
+            ],
+        },
+        Common.ValueListWithFixedValues : true,
+        Common.FieldControl : #Mandatory,
+    )
+};
+
+annotate service.Departments with {
+    ID @Common.Text : {
+        $value : name,
+        ![@UI.TextArrangement] : #TextOnly,
+    }
 };
 

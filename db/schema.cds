@@ -8,13 +8,16 @@ using {
     managed
 } from '@sap/cds/common';
 using {YY1_FIXED_ASSET as fixedasset} from '../srv/external/YY1_FIXED_ASSET';
+using { deptassets } from './department_maintenance';
 
 entity YY1_FIXED_ASSETS_CC as projection on fixedasset.YY1_FIXED_ASSETS_CC;
 
 entity RequestDetails : cuid, managed {
     date              : Date @title: 'Date';
     requestorName     : String(100) @title: 'Requestor Name';
-    departmentName    : String(100) @title: 'Department Name';
+    
+    department        : Association to one deptassets.Departments @title : 'Department';
+
     totalPurchaseCost : String(100) @title: 'Total Purchase Cost';
     assetDetails      : Composition of many AssetDetails
                             on assetDetails.requestDetails = $self;
@@ -54,7 +57,7 @@ entity AssetDetails : cuid, managed {
     netBookValue      : Decimal(24, 3) @title: 'Net Book Value';
     companyCode       : String(6) @title: 'Company Code';
     reasonWriteOff    : String(100) @title: 'Reason For Write Off';
-    disposalMethod    : String(100) @title: 'Disposal Method';
+    disposalMethod    : String(100) @title: 'Proposed Method of Disposal';
     scrapValue        : Decimal(24, 3) @title: 'Salvage Value';
     requestDetails    : Association to one RequestDetails;
     Currency          : String(5) @title: 'Currency';
@@ -74,4 +77,10 @@ entity AuditTrail : cuid, managed {
     requestDetails  : Association to RequestDetails; // Connects to RequestDetails entity
 }
 
-//status {}
+// Department Assets
+@cds.persistence.skip
+entity DepartmentAssets {
+    key department: UUID @title : 'Department ID';
+    key assetNumber: String(19) @title : 'Asset Number'; 
+        costCenter: String(12) @title: 'Cost Center';
+}

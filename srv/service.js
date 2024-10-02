@@ -39,7 +39,9 @@ module.exports = class AssetDisposal extends cds.ApplicationService {
             }
         });
 
-
+        this.on('READ', 'AssetDisposal.DepartmentAssets', async (req) => {
+            console.log(req.query);
+        });
 
         this.on('sideEffectTriggerAction', "AssetDetails.drafts", async (req) => {
             console.log("Hit it")
