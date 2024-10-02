@@ -39,8 +39,13 @@ module.exports = class AssetDisposal extends cds.ApplicationService {
             }
         });
 
-        this.on('READ', 'AssetDisposal.DepartmentAssets', async (req) => {
+        this.on('READ', 'DepartmentAssets', async (req) => {
+            let departmentId;
+            if(req.query.SELECT.where?.[0].ref?.[0] === "department"){
+                departmentId = req.query.SELECT.where?.[2].val;
+            }
             console.log(req.query);
+            return [];
         });
 
         this.on('sideEffectTriggerAction', "AssetDetails.drafts", async (req) => {

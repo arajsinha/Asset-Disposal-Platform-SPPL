@@ -306,13 +306,6 @@ annotate service.AuditTrail with {
     approver @Common.FieldControl : #ReadOnly
 };
 
-annotate service.YY1_FIXED_ASSETS_CC with {
-    FixedAssetExternalID @Common.Text : {
-        $value : FixedAssetDescription,
-        ![@UI.TextArrangement] : #TextLast,
-    }
-};
-
 annotate service.AssetDetails with {
     subNumber @Common.FieldControl : #ReadOnly
 };
