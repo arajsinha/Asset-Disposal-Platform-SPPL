@@ -28,6 +28,7 @@ annotate service.RequestDetails with @(
         {
             $Type : 'UI.DataFieldForAction',
             Action : 'AssetDisposal.withdraw',
+            // ![@UI.Hidden]: isWithdrawAllowed,
             Determining : true,
         },
     ],
