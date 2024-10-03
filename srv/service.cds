@@ -35,6 +35,7 @@ service AssetDisposal {
       'assetPurchaseDate',
       'assetPurchaseCost',
       'companyCode',
+      'assetPurchaseCost',
       'netBookValue'
     ],
     TriggerAction   : 'AssetDisposal.sideEffectTriggerAction'

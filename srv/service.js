@@ -65,7 +65,7 @@ module.exports = class AssetDisposal extends cds.ApplicationService {
                         'CostCenter': { in: costCentersArray },
                         'ValidityEndDate': '9999-12-31' // Additional AND condition
                     })
-                    // .limit(req.query.SELECT.limit.offset.val, req.query.SELECT.limit.rows.val)
+                // .limit(req.query.SELECT.limit.offset.val, req.query.SELECT.limit.rows.val)
             );
             const finalAssetData = assetData.map((center) => { return { assetNumber: center.FixedAssetExternalID, costCenter: center.CostCenter } });
             // console.log(req.query);
@@ -77,8 +77,34 @@ module.exports = class AssetDisposal extends cds.ApplicationService {
             // 100001
             let ans = await SELECT.one.from(AssetDetails.drafts).where({ 'ID': req.params[1].ID })
             console.log(ans)
+            const nbv = await cds.connect.to("ASSET_BALANCE")
+            let now = new Date().toISOString().split('.')[0];
+            let formattedDate = `datetime'${now.replace('Z', '')}'`;
+            console.log(formattedDate)
+            let NBVvalues = {
+                AssetAccountingKeyFigureSet: "ABS_DEF",
+                FiscalYear: "2024",
+                FiscalPeriod: "12",
+                KeyDate: formattedDate,
+                MasterFixedAsset: 'nice',
+                AssetDepreciationArea: '01',
+                CurrencyRole: '10',
+                Ledger: '0L',
+                CompanyCode: '2000',
+            }
+            let res = await nbv.send({
+                method: 'GET', path: `YY1_Asset_Balance_Cube(P_AssetAccountingKeyFigureSet='${NBVvalues.AssetAccountingKeyFigureSet}',P_FiscalYear='${NBVvalues.FiscalYear}',P_FiscalPeriod='${NBVvalues.FiscalPeriod}',P_KeyDate=datetime'2025-12-30T00:00:00')/Results?$format=json&$filter=MasterFixedAsset eq '${ans.assetNumber.split("-")[0]}' and AssetDepreciationArea eq '${NBVvalues.AssetDepreciationArea}' and CurrencyRole eq '${NBVvalues.CurrencyRole}' and Ledger eq '${NBVvalues.Ledger}' and CompanyCode eq '${NBVvalues.CompanyCode}' and (AssetAccountingSortedKeyFigure eq '000001-0010700111' or AssetAccountingSortedKeyFigure eq '000014-0010790401')&$select=AssetAccountingSortedKeyFigure,AmountInDisplayCurrency,AcquisitionValueDate`
+            })
+            let timestamp = parseInt(res[0].AcquisitionValueDate.match(/\d+/)[0]);
+
+            // Convert the timestamp to a JavaScript Date object
+            let dateObject = new Date(timestamp);
             let assetData = await fixa.run(SELECT.one.from(YY1_FIXED_ASSETS_CC).where({ 'FixedAssetExternalID': ans.assetNumber }));
-            await UPDATE.entity(AssetDetails.drafts).set({ 'subNumber': assetData.FixedAsset, 'assetClass': assetData.AssetClass, 'costCenter': assetData.CostCenter, 'assetPurchaseDate': assetData.AcquisitionValueDate, 'companyCode': assetData.CompanyCode, 'assetDesc': assetData.FixedAssetDescription }).where({ 'ID': req.params[1].ID });
+            await UPDATE.entity(AssetDetails.drafts).set({
+                'subNumber': assetData.FixedAsset, 'assetClass': assetData.AssetClass, 'costCenter': assetData.CostCenter, 'netBookValue': res[1].AmountInDisplayCurrency,
+                'assetPurchaseDate': dateObject,
+                'companyCode': assetData.CompanyCode, 'assetDesc': assetData.FixedAssetDescription, 'assetPurchaseCost': res[0].AmountInDisplayCurrency
+            }).where({ 'ID': req.params[1].ID });
             //pass all key fields, it is a bug for getting duplicate entries
             console.log(assetData)
         })

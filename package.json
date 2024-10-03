@@ -51,6 +51,13 @@
           "destination": "sap_process_automation_service"
         }
       },
+      "ASSET_BALANCE": {
+        "kind": "odata-v2",
+        "credentials": {
+          "path": "/sap/opu/odata/sap/YY1_ASSET_BALANCE_CUBE_CDS",
+          "destination": "SingPoolsS4HANA"
+        }
+      },
       "[hybrid]": {
         "auth": "xsuaa",
         "YY1_FIXED_ASSET": {
