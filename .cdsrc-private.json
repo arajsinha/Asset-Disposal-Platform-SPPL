@@ -74,6 +74,20 @@
         "vcap": {
           "name": "objectstore"
         }
+      },
+      "custom-service:malware-scan": {
+        "binding": {
+          "type": "cf",
+          "apiEndpoint": "https://api.cf.eu10-004.hana.ondemand.com",
+          "org": "Technical Field Enablement_sap-process-automation-tfe",
+          "space": "DEV",
+          "instance": "malware-scan",
+          "key": "malware-scan-key",
+          "resolved": false
+        },
+        "vcap": {
+          "name": "custom-service:malware-scan"
+        }
       }
     }
   }
