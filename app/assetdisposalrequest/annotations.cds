@@ -1,4 +1,22 @@
 using AssetDisposal as service from '../../srv/service';
+using { Attachments } from '@cap-js/attachments';
+
+annotate Attachments with @UI:{
+  HeaderInfo: {
+    TypeName: '{i18n>Attachment}',
+    TypeNamePlural: '{i18n>Attachments}',
+  },
+  LineItem: [
+    {Value: content, @HTML5.CssDefaults: {width: '30%'}},
+    {Value: createdAt, @HTML5.CssDefaults: {width: '20%'}},
+    {Value: createdBy, @HTML5.CssDefaults: {width: '15%'}},
+    {Value: note, @HTML5.CssDefaults: {width: '25%'}}
+  ]
+} {
+  content
+    @Core.ContentDisposition: { Filename: filename, Type: 'inline' }
+    @Core.Immutable
+}
 
 
 annotate service.RequestDetails with @(

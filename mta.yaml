@@ -10,7 +10,8 @@ modules:
       - name: asset-disposal-auth
       - name: asset-disposal-singaporepools-db
       - name: asset-disposal-singaporepools-destination
-      - name: sdm-di-instance
+      - name: object-store-aws
+      - name: malware-scan
     provides:
       - name: srv-api
         properties:
@@ -152,11 +153,16 @@ resources:
     parameters:
       service: html5-apps-repo
       service-plan: app-runtime
-  - name: sdm-di-instance
+  - name: object-store-aws
     type: org.cloudfoundry.managed-service
     parameters:
-      service: sdm
-      service-plan: standard
+      service: objectstore
+      service-plan: s3-standard
+  - name: malware-scan
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service: malware-scanner
+      service-plan: clamav
 parameters:
   deploy_mode: html5-repo
   enable-parallel-deployments: true

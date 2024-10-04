@@ -51,6 +51,15 @@
           "destination": "sap_process_automation_service"
         }
       },
+      "spa-process-automation-tokenexchange": {
+        "kind": "rest",
+        "credentials": {
+          "destination": "sap_process_automation_service_tokenexchange"
+        }
+      },
+      "attachments": {
+        "scan": false
+      },
       "ASSET_BALANCE": {
         "kind": "odata-v2",
         "credentials": {
