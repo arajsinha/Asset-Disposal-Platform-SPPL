@@ -1,0 +1,124 @@
+<mvc:View
+	height="100%"
+	displayBlock="true"
+	xmlns="sap.m"
+	xmlns:mvc="sap.ui.core.mvc"
+	xmlns:f="sap.f"
+	xmlns:core="sap.ui.core"
+	xmlns:mdc="sap.ui.mdc"
+	xmlns:mdct="sap.ui.mdc.table"
+	xmlns:vm="sap.ui.fl.variants"
+	controllerName="project1.controller.View1"
+	xmlns:upload="sap.m.upload"
+	xmlns:mdcat="sap.ui.mdc.actiontoolbar">
+
+	<f:DynamicPage id="page">
+		<f:content>
+			<Table
+				id="table-uploadSet"
+				sticky="ColumnHeaders,HeaderToolbar"
+				width="auto"
+				mode="MultiSelect"
+				fixedLayout="false"
+				inset="true"
+				autoPopinMode="true"
+				hiddenInPopin="None"
+				items="{path: 'attachments', templateShareable: false}"
+				selectionChange="onSelectionChange">
+
+				<headerToolbar>
+					<OverflowToolbar>
+						<!-- <Title
+								text="Documents ({= ${attachments}.length})"
+								level="H2"
+						/> -->
+						<ToolbarSpacer />
+						
+						<!-- <SearchField
+                        width="20%"
+                        liveChange="onSearch"
+                    >
+                        <layoutData>
+                            <OverflowToolbarLayoutData
+                                priority="NeverOverflow"
+                            />
+                        </layoutData>
+                    </SearchField> -->
+                    <ToolbarSeparator />
+
+                    <!-- Use the UploadButtonPlaceholder to add the UploadButton to the toolbar -->
+                    <upload:ActionsPlaceholder id="uploadButton" placeholderFor="UploadButtonPlaceholder" />
+
+                    
+					</OverflowToolbar>
+				</headerToolbar>
+
+				<dependents>
+						<plugins.UploadSetwithTable
+						uploadUrl="/content"
+						multiple="true"
+						beforeInitiatingItemUpload="onBeforeInitiatingItemUpload"
+						beforeUploadStarts="onBeforeUploadStarts"
+						itemRenamed="onDocumentRenamedSuccess"
+						uploadCompleted="onUploadCompleted"
+						onActivated="onPluginActivated"
+						cloudFilePickerEnabled="true"
+						actions="uploadButton"
+						>
+							<rowConfiguration>
+								<upload.UploadItemConfiguration
+								fileNamePath="filename"
+								mediaTypePath="mimeType"
+								urlPath="content"
+                                isTrustedSourcePath="trustedSource"
+								/>
+							</rowConfiguration>
+						</plugins.UploadSetwithTable>
+				</dependents>
+
+				 <columns>
+					<Column id="fileName" importance="High">
+						<header>
+							<Label text="File Name" />
+						</header>
+					</Column>
+					<Column id="actionButton" importance="High" />
+            </columns>
+
+
+			<items>
+                <ColumnListItem
+					press="onItemPress"
+					highlight="{= ${documents>uploadState} === 'Complete' ? 'Indication05' : null }"
+                >
+
+                <!-- Cells with cell template defining content for each column (cells and columns work with 1:1 mapping) -->
+                    <cells>
+                        <HBox>
+                            <core:Icon
+                                src="{parts: ['mimeType', 'filename'], formatter: '.getIconSrc' }"
+                            />
+                                <Link
+                                    text="{filename}"
+                                    href="/odata/v4/asset-disposal/RequestDetails(ID={up__ID},IsActiveEntity=true)/attachments(up__ID={up__ID},ID={ID},IsActiveEntity=true)/content"
+                                    class="sapUiTinyMarginBegin"
+                                    target="_blank"
+                                />
+                        </HBox>
+                        <Text text="{documents>id}" />
+                        <Link text="{documents>revision}" />
+                        <Text text="{documents>status}" />
+                       <Button
+                            class="sapUiTinyMarginBegin"
+                            type="Transparent"
+                            icon="sap-icon://decline"
+                            press="onRemoveHandler"
+                        />
+                    </cells>
+                </ColumnListItem>
+            </items>
+			</Table>
+		</f:content>
+	</f:DynamicPage>
+
+</mvc:View>

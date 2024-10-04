@@ -1,0 +1,1 @@
+using AssetDisposalTaskUI as service from '../../srv/taskui';
