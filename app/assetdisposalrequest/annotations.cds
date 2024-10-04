@@ -30,6 +30,7 @@ annotate service.RequestDetails with @(
             Action : 'AssetDisposal.withdraw',
             // ![@UI.Hidden]: isWithdrawAllowed,
             Determining : true,
+            Label : 'Withdraw Request',
         },
     ],
 );

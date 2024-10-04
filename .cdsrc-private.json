@@ -75,7 +75,7 @@
           "name": "objectstore"
         }
       },
-      "custom-service:malware-scan": {
+      "malware-scanner": {
         "binding": {
           "type": "cf",
           "apiEndpoint": "https://api.cf.eu10-004.hana.ondemand.com",
@@ -86,7 +86,7 @@
           "resolved": false
         },
         "vcap": {
-          "name": "custom-service:malware-scan"
+          "name": "malware-scanner"
         }
       }
     }
