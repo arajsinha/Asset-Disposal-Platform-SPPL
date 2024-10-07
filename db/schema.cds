@@ -19,6 +19,7 @@ entity RequestDetails : cuid, managed {
     department        : Association to one deptassets.Departments @title : 'Department';
 
     totalPurchaseCost : String(100) @title: 'Total Purchase Cost';
+    maxPurchaseCost   : String(100) @title: 'Maximum Purchase Cost';
     assetDetails      : Composition of many AssetDetails
                             on assetDetails.requestDetails = $self;
     objectId          : String(14) @title: 'Request ID';

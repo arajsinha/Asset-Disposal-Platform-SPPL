@@ -123,13 +123,13 @@ module.exports = class AssetDisposal extends cds.ApplicationService {
         });
 
         this.before("NEW", "RequestDetails.drafts", async (req) => {
-            console.log(req.data)
+            console.log(req.data);
             req.data.assetDetails ??= {};
             req.data.objectId = '0000' + '$';
             req.data.RequestStatus_id = "new";
             req.data.date = new Date().toISOString().split('T')[0];
-            req.data.requestorName = (req.user.attr.givenName) + " " + (req.user.attr.familyName)
-            console.log((req.user.attr.givenName) + " " + (req.user.attr.familyName))
+            req.data.requestorName = (req.user.attr.givenName) + " " + (req.user.attr.familyName);
+            console.log((req.user.attr.givenName) + " " + (req.user.attr.familyName));
             // await UPDATE.entity(RequestDetails).set({ 'requestorName': (req.user.attr.givenName) + (req.user.attr.familyName) }).where({ 'ID': req.ID });
             // req.user.id
         });
@@ -194,8 +194,40 @@ module.exports = class AssetDisposal extends cds.ApplicationService {
         // })
 
         this.after("CREATE", "RequestDetails", async (req) => {
+            let data = await SELECT.from(RequestDetails)
+                .columns(r => {
+                    r`.*`,
+                        r.assetDetails(ami => { ami`.*` })
+                })
+                .where({ ID: req.ID });
+
+            // Calculate totalPurchaseCost without a function
+            let result = data[0].assetDetails.reduce(
+                (acc, asset) => {
+                    const purchaseCost = parseFloat(asset.assetPurchaseCost || 0);
+
+                    // Accumulate the total purchase cost
+                    acc.total += purchaseCost;
+
+                    // Track the max purchase cost
+                    if (purchaseCost > acc.max) {
+                        acc.max = purchaseCost;
+                    }
+
+                    return acc;
+                },
+                { total: 0, max: 0 } // Initial values for total and max
+            );
+
+            // Assign the calculated values
+            req.totalPurchaseCost = result.total.toFixed(3);
+            req.maxPurchaseCost = result.max.toFixed(3);
+            await UPDATE.entity(RequestDetails).set({'totalPurchaseCost': req.totalPurchaseCost, 'maxPurchaseCost': req.maxPurchaseCost}).where({'ID': req.ID})
             let workflowContext = {}
             workflowContext.objectid = req.ID;
+            let deptName = await SELECT.from(Departments).where({ 'ID': req.department_ID });
+            workflowContext.departmentname = deptName[0].name;
+            workflowContext.maxpurchasecost = Math.floor('76000');
 
             // Calculate totalPurchaseCost based on the sum of all assetPurchaseCosts
             // workflowContext.totalpurchasecost = workflowContext.assetdetails.reduce((total, asset) => {
@@ -207,7 +239,7 @@ module.exports = class AssetDisposal extends cds.ApplicationService {
 
             await UPDATE.entity(RequestDetails).set({ 'totalPurchaseCost': req.totalPurchaseCost }).where({ 'ID': req.ID });
 
-            const approval = await cds.connect.to("spa-process-automation")
+            const approval = await cds.connect.to("spa-process-automation-tokenexchange")
             try {
                 let res = await approval.send({
                     method: 'POST', path: '/workflow/rest/v1/workflow-instances', data:
@@ -252,33 +284,14 @@ module.exports = class AssetDisposal extends cds.ApplicationService {
             }
 
             let workflowContext = {}
-            workflowContext.date = obj[0].date;
-            workflowContext.requestorname = obj[0].requestorName;
-            workflowContext.departmentname = obj[0].departmentName;
-            workflowContext.totalpurchasecost = obj[0].totalPurchaseCost;
-            workflowContext.objectid = obj[0].objectId;
-            workflowContext.requeststatus = obj[0].RequestStatus_id;
-            workflowContext.assetdetails = obj[0].assetDetails.map(item => ({
-                assetClass: item.assetClass,
-                assetDesc: item.assetDesc !== null ? item.assetDesc : '',
-                assetNumber: item.assetNumber,
-                assetPurchaseCost: item.assetPurchaseCost,
-                assetPurchaseDate: item.assetPurchaseDate,
-                companyCode: item.companyCode,
-                costCenter: item.costCenter,
-                disposalMethod: item.disposalMethod,
-                netBookValue: item.netBookValue,
-                reasonWriteOff: item.reasonWriteOff,
-                scrapValue: item.scrapValue,
-                subNumber: item.subNumber,
-            }));
+            workflowContext.objectid = req.ID;
 
             // Calculate totalPurchaseCost based on the sum of all assetPurchaseCosts
-            workflowContext.totalpurchasecost = workflowContext.assetdetails.reduce((total, asset) => {
-                return total + asset.assetPurchaseCost;
-            }, 0);
+            // workflowContext.totalpurchasecost = workflowContext.assetdetails.reduce((total, asset) => {
+            //     return total + asset.assetPurchaseCost;
+            // }, 0);
 
-            await UPDATE.entity(RequestDetails).set({ 'totalPurchaseCost': req.totalPurchaseCost }).where({ 'ID': req.ID });
+            // await UPDATE.entity(RequestDetails).set({ 'totalPurchaseCost': req.totalPurchaseCost }).where({ 'ID': req.ID });
 
 
             try {
