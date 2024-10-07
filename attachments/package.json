@@ -1,0 +1,75 @@
+{
+  "name": "attachments",
+  "description": "CAP cds-plugin providing image and attachment storing out-of-the-box.",
+  "version": "1.0.0",
+  "repository": "attachments",
+  "author": "SAP SE (https://www.sap.com)",
+  "homepage": "https://cap.cloud.sap/",
+  "license": "SEE LICENSE IN LICENSE",
+  "main": "cds-plugin.js",
+  "files": [
+    "index.cds",
+    "lib",
+    "srv"
+  ],
+  "scripts": {
+    "lint": "npx eslint ."
+  },
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.400.0",
+    "@aws-sdk/lib-storage": "^3.515.0",
+    "@sap/xsenv": "^4.2.0"
+  },
+  "devDependencies": {
+    "@cap-js/sqlite": "^1.0.1",
+    "axios": "^1.4.0",
+    "chai": "^4.4.1",
+    "chai-as-promised": "^7.1.1",
+    "chai-subset": "^1.6.0",
+    "eslint": "^8",
+    "express": "^4.18.2",
+    "jest": "^29.7.0"
+  },
+  "peerDependencies": {
+    "@sap/cds": ">=8"
+  },
+  "engines": {
+    "node": ">=17.0.0"
+  },
+  "cds": {
+    "requires": {
+      "kinds": {
+        "attachments-db": {
+          "impl": "attachments/lib/basic"
+        },
+        "attachments-s3": {
+          "impl": "attachments/lib/aws-s3",
+          "vcap": {
+            "label": "objectstore"
+          }
+        }
+      },
+      "attachments": {
+        "scan": false
+      },
+      "[development]": {
+        "attachments": {
+          "scan": false,
+          "kind": "db"
+        }
+      },
+      "[production]": {
+        "attachments": {
+          "kind": "s3",
+          "scan": false
+        }
+      },
+      "[hybrid]": {
+        "attachments": {
+          "kind": "s3",
+          "scan": false
+        }
+      }
+    }
+  }
+}

@@ -47,6 +47,10 @@ modules:
             - assetdisposalrequest.zip
           name: assetdisposalrequest
           target-path: app//
+        - artifacts:
+            - project1.zip
+          name: dummyattachment
+          target-path: app//
   - name: asset-disposal-singaporepools-destination-content
     type: com.sap.application.content
     requires:
@@ -91,6 +95,17 @@ modules:
   - name: assetdisposalrequest
     type: html5
     path: app/assetdisposalrequest
+    build-parameters:
+      build-result: dist
+      builder: custom
+      commands:
+        - npm install
+        - npm run build:cf
+      supported-platforms:
+        []
+  - name: dummyattachment
+    type: html5
+    path: app/project1
     build-parameters:
       build-result: dist
       builder: custom
@@ -171,4 +186,4 @@ build-parameters:
     - builder: custom
       commands:
         - npm ci
-        - npx cds build --production
+        - npx cds build --ws-pack --production

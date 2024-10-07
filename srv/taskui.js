@@ -5,7 +5,7 @@ module.exports = class AssetDisposalTaskUI extends cds.ApplicationService {
 
     async init() {
         console.log("Service JS Triggered")
-        const { RequestDetails, AssetDetails, AuditTrail } = this.entities;
+        const { RequestDetails, AssetDetails, AuditTrail  } = this.entities;
         const logger = cds.log('srv');
 
         let obj = []
@@ -33,6 +33,16 @@ module.exports = class AssetDisposalTaskUI extends cds.ApplicationService {
                 }
             )
         })
+
+        this.on(
+            "PUT",
+            "AttachmentUpload",
+            async (req) => {
+                const attachmentsSrv = await cds.connect.to("attachments");
+                await attachmentsSrv.updateContentHandlerNonDraft(req, "AssetDisposalTaskUI.RequestDetails.attachments");
+                console.log("Upload Triggered");
+             }
+          );
 
         this.on("void", "RequestDetails", async (req) => {
             console.log(req.user);

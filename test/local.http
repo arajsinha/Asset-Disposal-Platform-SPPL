@@ -35,3 +35,19 @@ GET http://localhost:4004/odata/v4/asset-disposal-task-ui/RequestDetails(ID={{re
 
 ### Call Void
 POST http://localhost:4004/odata/v4/asset-disposal-task-ui/RequestDetails(ID={{requestId}})/AssetDisposalTaskUI.void
+
+### Put Attachment
+PUT http://localhost:4004/odata/v4/asset-disposal-task-ui/RequestDetails(ID=372b6264-59c1-4869-83a5-09e95e5102dd)/attachments(up__ID=372b6264-59c1-4869-83a5-09e95e5102dd,ID=48a7ad6c-496a-4692-8857-de7b5d668d7c)/content
+Content-Type: image/png
+Accept: application/json
+
+< ./Multi-Region Manager ACD.png
+
+### Read TaskUI
+GET http://localhost:4004/odata/v4/asset-disposal-task-ui/RequestDetails(ID=372b6264-59c1-4869-83a5-09e95e5102dd,IsActiveEntity=true)
+
+### Add Attachment
+POST http://localhost:4004/odata/v4/asset-disposal-task-ui/RequestDetails(ID=372b6264-59c1-4869-83a5-09e95e5102dd,IsActiveEntity=true)/attachments
+Accept:application/json;
+
+{"filename":"Architecting-multi-region-resiliency-for-SAP-BTP-use-cases_diagram.png"}

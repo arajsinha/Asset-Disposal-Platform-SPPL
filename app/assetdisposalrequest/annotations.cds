@@ -1,5 +1,5 @@
 using AssetDisposal as service from '../../srv/service';
-using { Attachments } from '@cap-js/attachments';
+using { Attachments } from '../../attachments';
 
 annotate Attachments with @UI:{
   HeaderInfo: {

@@ -1,4 +1,5 @@
 using spassets from '../db/schema';
+using deptassets from '../db/department_maintenance';
 
 type auditTrailType : {
   taskID     : String(100);
@@ -11,7 +12,6 @@ type auditTrailType : {
 };
 
 service AssetDisposalTaskUI {
-  @readonly
   entity RequestDetails as projection on spassets.RequestDetails
     actions {
       action void();
@@ -30,4 +30,9 @@ service AssetDisposalTaskUI {
 
   @readonly
   entity AuditTrail     as projection on spassets.AuditTrail;
+
+  entity AttachmentUpload as projection on spassets.AttachmentUpload;
+
+  @readonly
+  entity Departments         as projection on deptassets.Departments;
 }

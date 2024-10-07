@@ -1,7 +1,7 @@
 namespace spassets;
 
 // using {Attachments} from '@cap-js/sdm';
-using { Attachments } from '@cap-js/attachments';
+using { Attachments } from '../attachments';
 using {
     sap.common.CodeList,
     cuid,
@@ -83,4 +83,10 @@ entity DepartmentAssets {
     key department: UUID @title : 'Department ID';
     key assetNumber: String(19) @title : 'Asset Number'; 
         costCenter: String(12) @title: 'Cost Center';
+}
+@cds.persistence.skip
+entity AttachmentUpload : cuid {
+  content   : LargeBinary  @Core.MediaType: mediaType  @Core.ContentDisposition.Filename: fileName  @Core.ContentDisposition.Type: 'inline';
+  mediaType : String       @Core.IsMediaType;
+  fileName  : String;
 }

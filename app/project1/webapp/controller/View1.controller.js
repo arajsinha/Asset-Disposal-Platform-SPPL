@@ -1,56 +1,56 @@
 sap.ui.define([
-    "sap/ui/core/mvc/Controller",
-    "sap/m/plugins/UploadSetwithTable"
+	"sap/ui/core/mvc/Controller",
+	"sap/m/plugins/UploadSetwithTable",
+	"sap/ui/core/Item"
 ],
-function (Controller,UploadSetwithTable) {
-    "use strict";
+	function (Controller, UploadSetwithTable, Item) {
+		"use strict";
 
-    return Controller.extend("project1.controller.View1", {
-        onInit: function () {
-            this.getView().bindElement({ path: `/RequestDetails(ID=1b495cef-d9bd-4277-b054-cf52e05d87fa)` });
-  
-        },
-        onPluginActivated: function(oEvent) {
-			this.oUploadPluginInstance = oEvent.getParameter("oPlugin");
-		},
-        getIconSrc: function(mediaType){
-            return UploadSetwithTable.getIconForFileType(mediaType, "");
-        },
-        onSelectionChange: function(oEvent) {
-			const oTable = oEvent.getSource();
-			const aSelectedItems = oTable?.getSelectedContexts();
-			const oDownloadBtn = this.byId("downloadSelectedButton");
-			const oEditUrlBtn = this.byId("editUrlButton");
-			const oRenameBtn = this.byId("renameButton");
-			const oRemoveDocumentBtn = this.byId("removeDocumentButton");
+		return Controller.extend("project1.controller.View1", {
+			onInit: function () {
+				this.getView().bindElement({ path: `/RequestDetails(ID=e79df67e-e754-44ed-b66d-8134f63ffd35)` });
+			},
+			uploadFile: async function (uploadInfo) {
+				const uploadSetItem = uploadInfo.oItem,
+					uploadSetTable = uploadInfo.oSource,
+					itemBinding = this.getView().byId("table-uploadSet").getBinding("items"),
+					data = {
+						filename: uploadSetItem.getFileName()
+					};
+				let createdItem = itemBinding.create(data, true);
+				await createdItem.created();
+				// let canonicalPath = createdItem.getCanonicalPath();
+				const ID = createdItem.getProperty("ID");
+				const uploadPath = `odata/v4/asset-disposal-task-ui/AttachmentUpload(${ID})/content`;
+				this.setHeaderFields(uploadSetTable);
+				uploadSetItem.setUploadUrl(uploadPath);
+				return await new Promise((resolve, reject)=>{
+					resolve(uploadSetItem);
+				});
+			},
+			addHeader: function (fileUploader, name, value) {
 
-			if (aSelectedItems.length > 0) {
-				oDownloadBtn.setEnabled(true);
-			} else {
-				oDownloadBtn.setEnabled(false);
+				const header = new Item({
+					key: name,
+					text: value
+				});
+				fileUploader.addHeaderField(header);
+			},
+			setHeaderFields: function (fileUploader) {
+				fileUploader.removeAllHeaderFields();
+				const token = fileUploader.getModel().getHttpHeaders()?.["X-CSRF-Token"];
+
+				if (token) {
+					this.addHeader(fileUploader, "x-csrf-token", token);
+				}
+
+				this.addHeader(fileUploader, "Accept", "application/json");
+			},
+			onPluginActivated: function (oEvent) {
+				this.oUploadPluginInstance = oEvent.getParameter("oPlugin");
+			},
+			getIconSrc: function (mediaType) {
+				return UploadSetwithTable.getIconForFileType(mediaType, "");
 			}
-			if (aSelectedItems.length === 1){
-				oEditUrlBtn.setEnabled(true);
-				oRenameBtn.setEnabled(true);
-				oRemoveDocumentBtn.setEnabled(true);
-			} else {
-				oRenameBtn.setEnabled(false);
-				oEditUrlBtn.setEnabled(false);
-				oRemoveDocumentBtn.setEnabled(false);
-			}
-		},
-        onDownloadFiles: function(oEvent) {
-			const oContexts = this.byId("table-uploadSet").getSelectedContexts();
-			if (oContexts && oContexts.length) {
-				oContexts.forEach((oContext) => this.oUploadPluginInstance.download(oContext, true));
-			}
-		},
-        openPreview: function(oEvent) {
-			const oSource = oEvent.getSource();
-			const oBindingContext = oSource.getBindingContext();
-			if (oBindingContext && this.oUploadPluginInstance) {
-				this.oUploadPluginInstance.openFilePreview(oBindingContext);
-			}
-		},
-    });
-});
+		});
+	});

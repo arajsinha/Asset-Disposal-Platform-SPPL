@@ -7,7 +7,6 @@
   "private": true,
   "dependencies": {
     "@cap-js-community/odata-v2-adapter": "^1.13.3",
-    "@cap-js/attachments": "^1.1.6",
     "@cap-js/hana": "^1.2.0",
     "@sap-cloud-sdk/http-client": "^3.21.0",
     "@sap-cloud-sdk/resilience": "^3.18.0",
@@ -15,7 +14,8 @@
     "@sap/cds": "^8.2.3",
     "@sap/xssec": "^4",
     "express": "^4",
-    "passport": "^0"
+    "passport": "^0",
+    "attachments": "*"
   },
   "devDependencies": {
     "@cap-js/cds-types": "^0.6",
@@ -24,6 +24,9 @@
     "@sap/ux-specification": "UI5-1.128",
     "rimraf": "^5.0.5"
   },
+  "workspaces": [
+    "attachments"
+  ],
   "scripts": {
     "start": "cds-serve",
     "watch-assetdisposal": "cds watch --open assetdisposal/webapp/index.html?sap-ui-xx-viewCache=false",
