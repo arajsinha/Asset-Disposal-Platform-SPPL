@@ -5,7 +5,7 @@ module.exports = class AssetDisposal extends cds.ApplicationService {
 
     async init() {
         console.log("Service JS Triggered")
-        const { RequestDetails, RequestStatus, AssetDetails, AuditTrail, Workflows, YY1_FIXED_ASSETS_CC, Departments, Users } = this.entities;
+        const { RequestDetails, RequestStatus, AssetDetails, AuditTrail, Workflows, YY1_FIXED_ASSETS_CC, Departments, Users, ASSET_RETIRE } = this.entities;
         const logger = cds.log('srv');
 
         let obj = []
@@ -71,6 +71,23 @@ module.exports = class AssetDisposal extends cds.ApplicationService {
             // console.log(req.query);
             return finalAssetData;
         });
+
+        this.on('void', "RequestDetails", async (req) => {
+            let workflows = await SELECT.one.from(RequestDetails).where({ 'ID': req.params[0].ID });
+            console.log(workflows)
+            const approval = await cds.connect.to("spa-process-automation-tokenexchange")
+            try {
+                let cancel = await approval.send({
+                    method: 'PATCH', path: '/workflow/rest/v1/workflow-instances/' + workflows.currentWorkflowID, data: {
+                        "definitionId": "eu10.sap-process-automation-tfe.singaporepoolsassets.assetDisposalApproval",
+                        "status": "CANCELED"
+                    }
+                })
+            }
+            catch {
+                console.log(error)
+            }
+        })
 
         this.on('sideEffectTriggerAction', "AssetDetails.drafts", async (req) => {
             console.log("Hit it")
@@ -222,12 +239,12 @@ module.exports = class AssetDisposal extends cds.ApplicationService {
             // Assign the calculated values
             req.totalPurchaseCost = result.total.toFixed(3);
             req.maxPurchaseCost = result.max.toFixed(3);
-            await UPDATE.entity(RequestDetails).set({'totalPurchaseCost': req.totalPurchaseCost, 'maxPurchaseCost': req.maxPurchaseCost}).where({'ID': req.ID})
+            await UPDATE.entity(RequestDetails).set({ 'totalPurchaseCost': req.totalPurchaseCost }).where({ 'ID': req.ID })
             let workflowContext = {}
             workflowContext.objectid = req.ID;
             let deptName = await SELECT.from(Departments).where({ 'ID': req.department_ID });
             workflowContext.departmentname = deptName[0].name;
-            workflowContext.maxpurchasecost = Math.floor('76000');
+            workflowContext.maxpurchasecost = Math.floor(req.maxPurchaseCost);
 
             // Calculate totalPurchaseCost based on the sum of all assetPurchaseCosts
             // workflowContext.totalpurchasecost = workflowContext.assetdetails.reduce((total, asset) => {
@@ -248,17 +265,19 @@ module.exports = class AssetDisposal extends cds.ApplicationService {
                         "context": workflowContext
                     }
                 })
+                console.log(res)
                 // console.log(cancel)
                 // workflowID = res.id
                 // await UPDATE.entity(Workflows).set({ 'ID': res.id }).where({ 'RequestDetailsID': req.ID });
                 // await UPDATE.entity(Workflows).set({ 'RequestDetailsID': res.id }).where({ 'ID': req.ID });
                 // Insert a new Workflow entry linked to the given RequestID
+                await UPDATE.entity(RequestDetails).set({ currentWorkflowID: res.id })
                 await INSERT.into(Workflows).entries({
                     workflowID: res.id,  // The new workflowID to be added
                     requestDetails_ID: req.ID  // Link it to the corresponding RequestDetails
                 });
-                // let data = await SELECT.from(Workflows).where({ 'requestDetails_ID': req.ID });
-                // console.log(res)
+                let nice = await SELECT.from(Workflows).where({ 'requestDetails_ID': req.ID });
+                console.log(nice)
             } catch (error) {
                 console.log(error)
             }
@@ -270,7 +289,7 @@ module.exports = class AssetDisposal extends cds.ApplicationService {
             obj = []
             obj.push(req)
             let workflowLength = (workflows.length - 1)
-            const approval = await cds.connect.to("spa-process-automation")
+            const approval = await cds.connect.to("spa-process-automation-tokenexchange")
             try {
                 let cancel = await approval.send({
                     method: 'PATCH', path: '/workflow/rest/v1/workflow-instances/' + workflows[workflowLength].workflowID, data: {

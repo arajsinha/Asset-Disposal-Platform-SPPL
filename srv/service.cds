@@ -17,6 +17,7 @@ service AssetDisposal {
   entity RequestDetails      as projection on spassets.RequestDetails
     actions {
       action withdraw();
+      action void()
     }
 
   // @odata.draft.enabled

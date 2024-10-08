@@ -3,7 +3,7 @@
 # Task UI OData Calls
 ################################################################################
 
-@requestId = d3340187-0be9-4f32-ab21-02b667326500
+@requestId = 842e8880-e711-4bca-b0ee-b56cca40348b
 
 ### Metadata
 GET http://localhost:4004/odata/v4/asset-disposal-task-ui/$metadata
@@ -29,6 +29,16 @@ Accept: application/json
   "workflowId" : "d3340187-0be9-4f32-ab21-02b667326500"
 }
 
+### Call Audit Trail Action
+POST http://localhost:4004/odata/v4/asset-disposal/RequestDetails(ID={{requestId}}, IsActiveEntity=true)/AssetDisposal.void
+Content-Type: application/json
+Accept: application/json
+
+{
+
+}
+
+
 ### Call AudiTrail Data   
 GET http://localhost:4004/odata/v4/asset-disposal-task-ui/RequestDetails(ID={{requestId}})/AuditTrail
 
@@ -51,3 +61,36 @@ POST http://localhost:4004/odata/v4/asset-disposal-task-ui/RequestDetails(ID=372
 Accept:application/json;
 
 {"filename":"Architecting-multi-region-resiliency-for-SAP-BTP-use-cases_diagram.png"}
+
+
+### Step 1 Get OAuth Token
+
+@clientid = sb-03e979f7-f927-41d1-8ade-e783057b84a7!b132941|xsuaa!b120249
+@clientsecret = ZWuVxDWAS6u3BTPM0zgeBofyk1Q=
+
+# @name postLogin
+POST https://sap-process-automation-tfe.authentication.eu10.hana.ondemand.com/oauth/token
+Content-Type: application/x-www-form-urlencoded
+
+grant_type=client_credentials&client_id={{clientid}}&client_secret={{clientsecret}}
+
+### Read oauth response
+@oauth_token = {{postLogin.response.body.access_token}}
+
+###
+PATCH https://spa-api-gateway-bpi-eu-prod.cfapps.eu10.hana.ondemand.com/public/workflow/rest/v1/workflow-instances/ff76fb6c-8575-11ef-ad03-eeee0a9facc9
+Content-Type: application/json
+Authorization: Bearer {{oauth_token}}
+
+{
+  "status": "CANCELED"
+}
+
+###
+GET https://spa-api-gateway-bpi-eu-prod.cfapps.eu10.hana.ondemand.com/public/workflow/rest/v1/workflow-instances/e00a0fcf-8578-11ef-ad03-eeee0a9facc9
+Content-Type: application/json
+Authorization: Bearer {{oauth_token}}
+
+{
+  "status": "CANCELED"
+}

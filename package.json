@@ -79,6 +79,14 @@
             "path": "/sap/opu/odata/sap/YY1_FIXED_ASSETS_CC_CDS",
             "destination": "SingPoolsS4HANA"
           }
+        },
+        "ASSET_RETIRE": {
+          "kind": "odata",
+          "model": "srv/external/ASSET_RETIRE",
+          "credentials": {
+            "path": "sap/opu/odata4/sap/api_fixedassetretirement/srvd_a2x/sap/fixedassetretirement/0001",
+            "destination": "SingPoolsS4HANA"
+          }
         }
       },
       "auth": "xsuaa",
