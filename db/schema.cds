@@ -75,8 +75,6 @@ entity AuditTrail : cuid, managed {
     workflows            : Association to Workflows; // Connects to RequestDetails entity
     requestDetails       : Association to RequestDetails; // Connects to RequestDetails entity
     canVoid              : Boolean;
-    @Core.Computed: false
-    virtual hideEdit : Boolean default false;
 }
 
 // Department Assets
