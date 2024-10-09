@@ -95,9 +95,18 @@ module.exports = class AssetDisposal extends cds.ApplicationService {
             }
         })
 
+        this.after("READ", "RequestDetails.drafts", async (results, req) => {
+            for (const result of results) {
+                result.canVoid = false; //default values
+                result.canEdit = true; //default values
+            }
+        });
+
         this.after("READ", "RequestDetails", async (results, req) => {
             if (req?.data?.ID) {
                 for (const result of results) {
+                    result.canEdit = false; //default values
+                    result.canVoid = false; //default values
                     let reqDetail = await SELECT.one.from(RequestDetails).where({ 'ID': result.ID });
                     let auditTrail = await SELECT.from(AuditTrail).where({ 'requestDetails_ID': result.ID, 'workflows_ID': reqDetail.currentWorkflowID, 'hasVoid': true });
                     for (const data of auditTrail) {

@@ -13,22 +13,22 @@ using {deptassets} from './department_maintenance';
 entity YY1_FIXED_ASSETS_CC as projection on fixedasset.YY1_FIXED_ASSETS_CC;
 
 entity RequestDetails : cuid, managed {
-    date                 : Date                                      @title: 'Date';
-    requestorName        : String(100)                               @title: 'Requestor Name';
-    department           : Association to one deptassets.Departments @title: 'Department';
-    totalPurchaseCost    : String(100)                               @title: 'Total Purchase Cost';
-    currentWorkflowID    : String(36);
-    assetDetails         : Composition of many AssetDetails
-                               on assetDetails.requestDetails = $self;
-    objectId             : String(14)                                @title: 'Request ID';
-    RequestStatus        : Association to one RequestStatus          @title: 'Request Status';
-    AuditTrail           : Association to many AuditTrail
-                               on AuditTrail.requestDetails = $self;
-    workflows            : Composition of many Workflows
-                               on workflows.requestDetails = $self; // One RequestDetails can have many Workflows
-    attachments          : Composition of many Attachments;
-    virtual canVoid : Boolean default false;
-    virtual canEdit : Boolean default true;
+    date              : Date                                      @title: 'Date';
+    requestorName     : String(100)                               @title: 'Requestor Name';
+    department        : Association to one deptassets.Departments @title: 'Department';
+    totalPurchaseCost : String(100)                               @title: 'Total Purchase Cost';
+    currentWorkflowID : String(36);
+    assetDetails      : Composition of many AssetDetails
+                            on assetDetails.requestDetails = $self;
+    objectId          : String(14)                                @title: 'Request ID';
+    RequestStatus     : Association to one RequestStatus          @title: 'Request Status';
+    AuditTrail        : Association to many AuditTrail
+                            on AuditTrail.requestDetails = $self;
+    workflows         : Composition of many Workflows
+                            on workflows.requestDetails = $self; // One RequestDetails can have many Workflows
+    attachments       : Composition of many Attachments;
+    virtual canVoid   : Boolean;
+    virtual canEdit   : Boolean;
 }
 
 entity Workflows : cuid, managed {
