@@ -78,19 +78,37 @@ module.exports = class AssetDisposal extends cds.ApplicationService {
             const approval = await cds.connect.to("spa-process-automation-tokenexchange")
             try {
                 let task = await approval.send({
-                    method: 'GET', path: '/workflow/res/v1/task-instances/'
-                })
+                    method: 'GET', path: `/workflow/rest/v1/task-instances?workflowInstanceId=${workflows.currentWorkflowID}`
+                });
+                console.log(task[0].id)
                 let cancel = await approval.send({
-                    method: 'PATCH', path: '/workflow/rest/v1/workflow-instances/' + workflows.currentWorkflowID, data: {
-                        "definitionId": "eu10.sap-process-automation-tfe.singaporepoolsassets.assetDisposalApproval",
+                    method: 'PATCH', path: '/workflow/rest/v1/task-instances/' + task[0].id, data: {
                         "status": "COMPLETED",
                         "decision": "void",
                         "approver": req.user.id
                     }
                 })
+                console.log(cancel)
             }
             catch {
                 console.log(error)
+            }
+        })
+
+        this.after("READ", "RequestDetails", async (results, req) => {
+            if (req?.data?.ID) {
+                for (const result of results) {
+                    let reqDetail = await SELECT.one.from(RequestDetails).where({ 'ID': result.ID });
+                    let auditTrail = await SELECT.from(AuditTrail).where({ 'requestDetails_ID': result.ID, 'workflows_ID': reqDetail.currentWorkflowID, 'hasVoid': true });
+                    for (const data of auditTrail) {
+                        if (req.user.id === data.approver && data.status != 'Void') {
+                            result.canVoid = true;
+                        }
+                        if(data.status == 'Void'){
+                            result.canEdit = false;
+                        }
+                    }
+                }
             }
         })
 
