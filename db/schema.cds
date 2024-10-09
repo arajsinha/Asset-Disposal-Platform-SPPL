@@ -63,18 +63,20 @@ entity AssetDetails : cuid, managed {
 }
 
 entity AuditTrail : cuid, managed {
-    taskID          : String(100) @title: 'Task ID';
-    taskDescription : String(100) @title: 'Task Description'; // From workflow
-    taskType        : String(100) @title: 'Task Type'; // Task Type configured by the end user: Verified by, Approved by ..,
-    timestamp       : Timestamp   @title: 'Timestamp';
-    subject         : String(200) @title: 'Subject'; // From workflow
-    approver        : String(100) @title: 'Approver Email';
-    approverName    : String(100) @title: 'Approver Name';
-    comment         : String(200) @title: 'Comment';
-    status          : String(20)  @title: 'Status';
-    workflows       : Association to Workflows; // Connects to RequestDetails entity
-    requestDetails  : Association to RequestDetails; // Connects to RequestDetails entity
-    canVoid         : Boolean;
+    taskID               : String(100) @title: 'Task ID';
+    taskDescription      : String(100) @title: 'Task Description'; // From workflow
+    taskType             : String(100) @title: 'Task Type'; // Task Type configured by the end user: Verified by, Approved by ..,
+    timestamp            : Timestamp   @title: 'Timestamp';
+    subject              : String(200) @title: 'Subject'; // From workflow
+    approver             : String(100) @title: 'Approver Email';
+    approverName         : String(100) @title: 'Approver Name';
+    comment              : String(200) @title: 'Comment';
+    status               : String(20)  @title: 'Status';
+    workflows            : Association to Workflows; // Connects to RequestDetails entity
+    requestDetails       : Association to RequestDetails; // Connects to RequestDetails entity
+    canVoid              : Boolean;
+    @Core.Computed: false
+    virtual hideEdit : Boolean default false;
 }
 
 // Department Assets

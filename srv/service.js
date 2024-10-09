@@ -77,10 +77,15 @@ module.exports = class AssetDisposal extends cds.ApplicationService {
             console.log(workflows)
             const approval = await cds.connect.to("spa-process-automation-tokenexchange")
             try {
+                let task = await approval.send({
+                    method: 'GET', path: '/workflow/res/v1/task-instances/'
+                })
                 let cancel = await approval.send({
                     method: 'PATCH', path: '/workflow/rest/v1/workflow-instances/' + workflows.currentWorkflowID, data: {
                         "definitionId": "eu10.sap-process-automation-tfe.singaporepoolsassets.assetDisposalApproval",
-                        "status": "CANCELED"
+                        "status": "COMPLETED",
+                        "decision": "void",
+                        "approver": req.user.id
                     }
                 })
             }
