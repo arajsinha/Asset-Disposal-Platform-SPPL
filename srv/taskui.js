@@ -29,7 +29,8 @@ module.exports = class AssetDisposalTaskUI extends cds.ApplicationService {
                     approver: req.user.attr.email,
                     comment: req.data.comment,
                     approverName: `${req.user.attr.givenName} ${req.user.attr.familyName}`,
-                    status: req.data.status
+                    status: req.data.status,
+                    hasVoid: req.data.hasVoid
                 }
             )
         })

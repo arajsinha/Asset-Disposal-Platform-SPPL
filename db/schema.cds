@@ -74,7 +74,7 @@ entity AuditTrail : cuid, managed {
     status               : String(20)  @title: 'Status';
     workflows            : Association to Workflows; // Connects to RequestDetails entity
     requestDetails       : Association to RequestDetails; // Connects to RequestDetails entity
-    canVoid              : Boolean;
+    hasVoid              : Boolean;
 }
 
 // Department Assets

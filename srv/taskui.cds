@@ -9,6 +9,7 @@ type auditTrailType : {
   workflowId : String(100);
   comment    : String(200);
   status     : String(20);
+  hasVoid    : Boolean; 
 };
 
 service AssetDisposalTaskUI {
@@ -22,7 +23,8 @@ service AssetDisposalTaskUI {
                            taskTitle : auditTrailType:taskID @mandatory,
                            workflowId : auditTrailType:taskID @mandatory,
                            comment  : auditTrailType:comment,
-                           status : auditTrailType:status @mandatory );
+                           status : auditTrailType:status @mandatory,
+                           hasVoid : auditTrailType:hasVoid );
     }
 
   @readonly
