@@ -3,6 +3,7 @@ using deptassets from '../db/department_maintenance';
 
 // namespace sap.fe.core;
 
+
 service DepartmentMaintenance {
   entity Users       as projection on deptassets.Users;
 
@@ -16,8 +17,16 @@ service AssetDisposal {
   @odata.draft.enabled
   entity RequestDetails      as projection on spassets.RequestDetails
     actions {
+      @(
+        cds.odata.bindingparameter.name: 'in',
+        Common.SideEffects             : {TargetProperties: ['in/RequestStatus_id']}
+      )
       action withdraw();
-      action void()
+      @(
+        cds.odata.bindingparameter.name: 'in',
+        Common.SideEffects             : {TargetProperties: ['in/RequestStatus_id']}
+      )
+      action void();
     }
 
   // @odata.draft.enabled

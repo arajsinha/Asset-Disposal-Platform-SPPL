@@ -1,0 +1,7 @@
+id,name,descr
+NEW,New,New
+INP,Approval Inprocess,Approval Inprocess
+APR,Approved,Approved
+REJ,Rejected,Rejected
+WTD,Withdrawn,Withdrawn
+VOD,Void,Void

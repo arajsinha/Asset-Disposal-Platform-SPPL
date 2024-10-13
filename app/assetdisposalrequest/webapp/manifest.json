@@ -114,15 +114,11 @@
                 "@com.sap.vocabularies.UI.v1.LineItem": {
                   "tableSettings": {
                     "type": "ResponsiveTable"
-                  },
-                  "columns": {
-                    "DataField::RequestStatus_id": {
-                      "width": "10%"
-                    }
                   }
                 }
               },
-              "initialLoad": "Enabled"
+              "initialLoad": "Enabled",
+              "defaultTemplateAnnotationPath": "com.sap.vocabularies.UI.v1.SelectionPresentationVariant#table"
             }
           }
         },
@@ -155,16 +151,6 @@
                   },
                   "tableSettings": {
                     "type": "GridTable"
-                  }
-                },
-                "AuditTrail/@com.sap.vocabularies.UI.v1.LineItem#AuditTrail": {
-                  "tableSettings": {
-                    "type": "ResponsiveTable"
-                  },
-                  "columns": {
-                    "DataField::taskType": {
-                      "width": "10%"
-                    }
                   }
                 }
               }

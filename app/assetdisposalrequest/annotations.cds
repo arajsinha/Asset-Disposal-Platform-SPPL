@@ -1,33 +1,4 @@
 using AssetDisposal as service from '../../srv/service';
-using {Attachments} from '../../attachments';
-
-annotate Attachments with @UI: {
-    HeaderInfo: {
-        TypeName      : '{i18n>Attachment}',
-        TypeNamePlural: '{i18n>Attachments}',
-    },
-    LineItem  : [
-        {
-            Value             : content,
-            @HTML5.CssDefaults: {width: '40%'}
-        },
-        {
-            Value             : createdAt,
-            @HTML5.CssDefaults: {width: '30%'}
-        },
-        {
-            Value             : createdBy,
-            @HTML5.CssDefaults: {width: '30%'}
-        }
-    ]
-} {
-    content
-    @Core.ContentDisposition : {
-        Filename: filename,
-        Type    : 'inline'
-    }
-    @Core.Immutable
-}
 
 annotate service.RequestDetails actions {
     void @Common.IsActionCritical;
@@ -58,7 +29,7 @@ annotate service.RequestDetails with @(
         {
             $Type: 'UI.DataField',
             Value: RequestStatus_id,
-        },
+        }
     ],
     UI.Identification: [
         {
@@ -83,6 +54,27 @@ annotate service.RequestDetails with @(
             ]}}
         },
     ],
+    UI.SelectionPresentationVariant #table : {
+        $Type : 'UI.SelectionPresentationVariantType',
+        PresentationVariant : {
+            $Type : 'UI.PresentationVariantType',
+            Visualizations : [
+                '@UI.LineItem',
+            ],
+            SortOrder : [
+                {
+                    $Type : 'Common.SortOrderType',
+                    Property : createdAt,
+                    Descending : true,
+                },
+            ],
+        },
+        SelectionVariant : {
+            $Type : 'UI.SelectionVariantType',
+            SelectOptions : [
+            ],
+        },
+    },
 );
 
 annotate service.RequestDetails with @(
@@ -395,11 +387,18 @@ annotate service.AssetDetails with {
 };
 
 annotate service.RequestDetails with {
-    RequestStatus @Common.FieldControl: #ReadOnly
+    totalPurchaseCost @Common.FieldControl: #ReadOnly
 };
 
+
 annotate service.RequestDetails with {
-    totalPurchaseCost @Common.FieldControl: #ReadOnly
+ RequestStatus @(
+        Common.Text                    : {
+            $value                : RequestStatus.name,
+            ![@UI.TextArrangement]: #TextOnly
+        },
+        Common.FieldControl: #ReadOnly
+    )
 };
 
 annotate service.AssetDetails with {

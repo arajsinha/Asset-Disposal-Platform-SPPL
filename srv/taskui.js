@@ -33,6 +33,10 @@ module.exports = class AssetDisposalTaskUI extends cds.ApplicationService {
                     hasVoid: req.data.hasVoid
                 }
             )
+
+            if(req.data.status === "Void"){
+                await UPDATE.entity(RequestDetails).set({ 'RequestStatus_id': "VOD" }).where({ 'ID': req.data.requestId });
+            }
         })
 
         this.on(

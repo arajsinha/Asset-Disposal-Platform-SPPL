@@ -9,11 +9,11 @@ type auditTrailType : {
   workflowId : String(100);
   comment    : String(200);
   status     : String(20);
-  hasVoid    : Boolean; 
+  hasVoid    : Boolean;
 };
 
 service AssetDisposalTaskUI {
-  entity RequestDetails as projection on spassets.RequestDetails
+  entity RequestDetails   as projection on spassets.RequestDetails
     actions {
       action void();
       action addAuditTrial(requestId : RequestDetails:ID @mandatory,
@@ -22,19 +22,19 @@ service AssetDisposalTaskUI {
                            taskType : auditTrailType:taskType @mandatory,
                            taskTitle : auditTrailType:taskID @mandatory,
                            workflowId : auditTrailType:taskID @mandatory,
-                           comment  : auditTrailType:comment,
+                           comment : auditTrailType:comment,
                            status : auditTrailType:status @mandatory,
-                           hasVoid : auditTrailType:hasVoid );
+                           hasVoid : auditTrailType:hasVoid);
     }
 
   @readonly
-  entity AssetDetails   as projection on spassets.AssetDetails;
+  entity AssetDetails     as projection on spassets.AssetDetails;
 
   @readonly
-  entity AuditTrail     as projection on spassets.AuditTrail;
+  entity AuditTrail       as projection on spassets.AuditTrail;
 
   entity AttachmentUpload as projection on spassets.AttachmentUpload;
 
   @readonly
-  entity Departments         as projection on deptassets.Departments;
+  entity Departments      as projection on deptassets.Departments;
 }

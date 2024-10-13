@@ -79,7 +79,7 @@ module.exports = class AssetDisposal extends cds.ApplicationService {
                 let tasks = await approval.send({
                     method: 'GET', path: `/workflow/rest/v1/task-instances?workflowInstanceId=${workflows.currentWorkflowID}`
                 });
-                tasks.forEach(async task => {
+                for (task in tasks){
                     if (task.status != 'COMPLETED') {
                         await approval.send({
                             method: 'PATCH', path: '/workflow/rest/v1/task-instances/' + task.id, data: {
@@ -89,7 +89,10 @@ module.exports = class AssetDisposal extends cds.ApplicationService {
                             }
                         })
                     }
-                })
+                }
+
+                // Update the request status to Void
+                await UPDATE.entity(RequestDetails).set({ 'RequestStatus_id': "VOD" }).where({ 'ID': req.params[0].ID });
             }
             catch {
                 console.log(error)
@@ -143,6 +146,9 @@ module.exports = class AssetDisposal extends cds.ApplicationService {
                         "status": "CANCELED"
                     }
                 })
+
+                // Update the request status to withdrawn
+                await UPDATE.entity(RequestDetails).set({ 'RequestStatus_id': "WTD" }).where({ 'ID': req.params[0].ID });
             }
             catch {
                 console.log(error)
@@ -190,7 +196,7 @@ module.exports = class AssetDisposal extends cds.ApplicationService {
                 console.log(count);
                 const counter = count.val + 1
                 req.data.objectId = counter.toString();
-                req.data.RequestStatus_id = "inp";
+                req.data.RequestStatus_id = "INP";
             }
             catch (error) {
                 console.error("Error:", error);
@@ -201,7 +207,7 @@ module.exports = class AssetDisposal extends cds.ApplicationService {
             console.log(req.data);
             req.data.assetDetails ??= {};
             req.data.objectId = '0000' + '$';
-            req.data.RequestStatus_id = "new";
+            req.data.RequestStatus_id = "NEW";
             req.data.date = new Date().toISOString().split('T')[0];
             req.data.requestorName = (req.user.attr.givenName) + " " + (req.user.attr.familyName);
             console.log((req.user.attr.givenName) + " " + (req.user.attr.familyName));
@@ -297,7 +303,7 @@ module.exports = class AssetDisposal extends cds.ApplicationService {
             // Assign the calculated values
             req.totalPurchaseCost = result.total.toFixed(3);
             req.maxPurchaseCost = result.max.toFixed(3);
-            await UPDATE.entity(RequestDetails).set({ 'totalPurchaseCost': req.totalPurchaseCost }).where({ 'ID': req.ID })
+            // await UPDATE.entity(RequestDetails).set({ 'totalPurchaseCost': req.totalPurchaseCost }).where({ 'ID': req.ID })
             let workflowContext = {}
             workflowContext.objectid = req.ID;
             let deptName = await SELECT.from(Departments).where({ 'ID': req.department_ID });
@@ -311,9 +317,6 @@ module.exports = class AssetDisposal extends cds.ApplicationService {
             // req.totalPurchaseCost = workflowContext.assetdetails.reduce((total, asset) => {
             //     return total + asset.assetPurchaseCost;
             // }, 0);
-
-            await UPDATE.entity(RequestDetails).set({ 'totalPurchaseCost': req.totalPurchaseCost }).where({ 'ID': req.ID });
-
             const approval = await cds.connect.to("spa-process-automation-tokenexchange")
             try {
                 let res = await approval.send({
@@ -329,7 +332,14 @@ module.exports = class AssetDisposal extends cds.ApplicationService {
                 // await UPDATE.entity(Workflows).set({ 'ID': res.id }).where({ 'RequestDetailsID': req.ID });
                 // await UPDATE.entity(Workflows).set({ 'RequestDetailsID': res.id }).where({ 'ID': req.ID });
                 // Insert a new Workflow entry linked to the given RequestID
-                await UPDATE.entity(RequestDetails).set({ currentWorkflowID: res.id })
+                // await UPDATE.entity(RequestDetails).set({ currentWorkflowID: res.id })
+                await UPDATE.entity(RequestDetails).set(
+                    {
+                        'totalPurchaseCost': req.totalPurchaseCost,
+                        "currentWorkflowID": res.id,
+                        "RequestStatus_id": "INP"
+                    }).where({ 'ID': req.ID });
+
                 await INSERT.into(Workflows).entries({
                     workflowID: res.id,  // The new workflowID to be added
                     requestDetails_ID: req.ID  // Link it to the corresponding RequestDetails
@@ -343,22 +353,22 @@ module.exports = class AssetDisposal extends cds.ApplicationService {
 
         this.after("UPDATE", "RequestDetails", async (req) => {
             // console.log(workflowID)
-            let workflows = await SELECT.from(Workflows).where({ 'requestDetails_ID': req.ID });
-            obj = []
-            obj.push(req)
-            let workflowLength = (workflows.length - 1)
+            // let workflows = await SELECT.from(Workflows).where({ 'requestDetails_ID': req.ID });
+            // obj = []
+            // obj.push(req)
+            // let workflowLength = (workflows.length - 1)
             const approval = await cds.connect.to("spa-process-automation-tokenexchange")
-            try {
-                let cancel = await approval.send({
-                    method: 'PATCH', path: '/workflow/rest/v1/workflow-instances/' + workflows[workflowLength].workflowID, data: {
-                        "definitionId": "eu10.sap-process-automation-tfe.singaporepoolsassets.assetDisposalApproval",
-                        "status": "CANCELED"
-                    }
-                })
-            }
-            catch {
-                console.log(error)
-            }
+            // try {
+            //     let cancel = await approval.send({
+            //         method: 'PATCH', path: '/workflow/rest/v1/workflow-instances/' + workflows[workflowLength].workflowID, data: {
+            //             "definitionId": "eu10.sap-process-automation-tfe.singaporepoolsassets.assetDisposalApproval",
+            //             "status": "CANCELED"
+            //         }
+            //     })
+            // }
+            // catch {
+            //     console.log(error)
+            // }
 
             let workflowContext = {}
             workflowContext.objectid = req.ID;
@@ -381,11 +391,17 @@ module.exports = class AssetDisposal extends cds.ApplicationService {
                 })
                 // console.log(cancel)
                 // console.log(res)
+                await UPDATE.entity(RequestDetails).set(
+                    {
+                        "currentWorkflowID": res.id,
+                        "RequestStatus_id": "INP"
+                    }).where({ 'ID': req.ID });
+
                 await INSERT.into(Workflows).entries({
                     workflowID: res.id,  // The new workflowID to be added
                     requestDetails_ID: req.ID  // Link it to the corresponding RequestDetails
                 });
-                let data = await SELECT.from(Workflows).where({ 'requestDetails_ID': req.ID });
+                // let data = await SELECT.from(Workflows).where({ 'requestDetails_ID': req.ID });
             } catch (error) {
                 console.log(error)
             }
