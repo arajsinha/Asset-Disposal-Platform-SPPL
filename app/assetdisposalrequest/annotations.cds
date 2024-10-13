@@ -9,19 +9,15 @@ annotate Attachments with @UI: {
     LineItem  : [
         {
             Value             : content,
-            @HTML5.CssDefaults: {width: '30%'}
+            @HTML5.CssDefaults: {width: '40%'}
         },
         {
             Value             : createdAt,
-            @HTML5.CssDefaults: {width: '20%'}
+            @HTML5.CssDefaults: {width: '30%'}
         },
         {
             Value             : createdBy,
-            @HTML5.CssDefaults: {width: '15%'}
-        },
-        {
-            Value             : note,
-            @HTML5.CssDefaults: {width: '25%'}
+            @HTML5.CssDefaults: {width: '30%'}
         }
     ]
 } {
@@ -33,6 +29,9 @@ annotate Attachments with @UI: {
     @Core.Immutable
 }
 
+annotate service.RequestDetails actions {
+    void @Common.IsActionCritical;
+}
 
 annotate service.RequestDetails with @(
     UI.UpdateHidden  : {$edmJson: {$Ne: [
@@ -63,10 +62,14 @@ annotate service.RequestDetails with @(
     ],
     UI.Identification: [
         {
-            $Type      : 'UI.DataFieldForAction',
-            Action     : 'AssetDisposal.withdraw',
-            Determining: true,
-            Label      : 'Withdraw Request',
+            $Type        : 'UI.DataFieldForAction',
+            Action       : 'AssetDisposal.withdraw',
+            Determining  : true,
+            Label        : 'Withdraw Request',
+            ![@UI.Hidden]: {$edmJson: {$Ne: [
+                {$Path: 'canWithdraw'},
+                true
+            ]}}
         },
         {
             $Type        : 'UI.DataFieldForAction',

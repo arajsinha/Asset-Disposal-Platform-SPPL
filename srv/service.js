@@ -74,21 +74,22 @@ module.exports = class AssetDisposal extends cds.ApplicationService {
 
         this.on('void', "RequestDetails", async (req) => {
             let workflows = await SELECT.one.from(RequestDetails).where({ 'ID': req.params[0].ID });
-            console.log(workflows)
             const approval = await cds.connect.to("spa-process-automation-tokenexchange")
             try {
-                let task = await approval.send({
+                let tasks = await approval.send({
                     method: 'GET', path: `/workflow/rest/v1/task-instances?workflowInstanceId=${workflows.currentWorkflowID}`
                 });
-                console.log(task[0].id)
-                let cancel = await approval.send({
-                    method: 'PATCH', path: '/workflow/rest/v1/task-instances/' + task[0].id, data: {
-                        "status": "COMPLETED",
-                        "decision": "void",
-                        "approver": req.user.id
+                tasks.forEach(async task => {
+                    if (task.status != 'COMPLETED') {
+                        await approval.send({
+                            method: 'PATCH', path: '/workflow/rest/v1/task-instances/' + task.id, data: {
+                                "status": "COMPLETED",
+                                "decision": "void",
+                                "approver": req.user.id
+                            }
+                        })
                     }
                 })
-                console.log(cancel)
             }
             catch {
                 console.log(error)
@@ -98,32 +99,57 @@ module.exports = class AssetDisposal extends cds.ApplicationService {
         this.after("READ", "RequestDetails.drafts", async (results, req) => {
             for (const result of results) {
                 result.canVoid = false; //default values
-                result.canEdit = true; //default values
+                result.canEdit = false; //default values
+                result.canWithdraw = false; //default values
             }
         });
 
         this.after("READ", "RequestDetails", async (results, req) => {
             if (req?.data?.ID) {
                 for (const result of results) {
-                    result.canEdit = false; //default values
+                    result.canEdit = true; //default values
                     result.canVoid = false; //default values
+                    result.canWithdraw = true; //default values
                     let reqDetail = await SELECT.one.from(RequestDetails).where({ 'ID': result.ID });
-                    let auditTrail = await SELECT.from(AuditTrail).where({ 'requestDetails_ID': result.ID, 'workflows_ID': reqDetail.currentWorkflowID, 'hasVoid': true });
+                    let auditTrail = await SELECT.from(AuditTrail).where({ 'requestDetails_ID': result.ID, 'workflows_ID': reqDetail.currentWorkflowID });
+                    if (auditTrail.length > 0) {
+                        result.canWithdraw = false
+                        result.canEdit = false
+                    }
                     for (const data of auditTrail) {
-                        if (req.user.id === data.approver && data.status != 'Void') {
+                        if (req.user.id === data.approver && data.status != 'Void' && data.hasVoid) {
                             result.canVoid = true;
                         }
-                        if(data.status == 'Void'){
+                        if (data.status == 'Void') {
                             result.canEdit = false;
+                            result.canWithdraw = false;
+                        }
+                        if ((data.taskType == 'Verified By' || data.taskType == 'Checked By' || data.taskType == 'Supported By' || data.taskType == 'Endorsed By' || data.taskType == 'Approved By') && data.status == 'Rejected') {
+                            result.canEdit = true;
+                            result.canWithdraw = true;
                         }
                     }
                 }
             }
         })
 
+        this.on('withdraw', "RequestDetails", async (req) => {
+            const approval = await cds.connect.to("spa-process-automation-tokenexchange")
+            let workflows = await SELECT.one.from(RequestDetails).where({ 'ID': req.params[0].ID });
+            try {
+                await approval.send({
+                    method: 'PATCH', path: '/workflow/rest/v1/workflow-instances/' + workflows.currentWorkflowID, data: {
+                        "definitionId": "eu10.sap-process-automation-tfe.singaporepoolsassets.assetDisposalApproval",
+                        "status": "CANCELED"
+                    }
+                })
+            }
+            catch {
+                console.log(error)
+            }
+        })
+
         this.on('sideEffectTriggerAction', "AssetDetails.drafts", async (req) => {
-            console.log("Hit it")
-            // 100001
             let ans = await SELECT.one.from(AssetDetails.drafts).where({ 'ID': req.params[1].ID })
             console.log(ans)
             const nbv = await cds.connect.to("ASSET_BALANCE")
@@ -365,11 +391,6 @@ module.exports = class AssetDisposal extends cds.ApplicationService {
             }
 
         });
-
-        this.on("withdraw", "RequestDetails", async (req) => {
-            console.log(obj)
-
-        })
 
         return super.init()
     }

@@ -29,6 +29,7 @@ entity RequestDetails : cuid, managed {
     attachments       : Composition of many Attachments;
     virtual canVoid   : Boolean;
     virtual canEdit   : Boolean;
+    virtual canWithdraw   : Boolean;
 }
 
 entity Workflows : cuid, managed {
