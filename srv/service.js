@@ -344,8 +344,8 @@ module.exports = class AssetDisposal extends cds.ApplicationService {
                     workflowID: res.id,  // The new workflowID to be added
                     requestDetails_ID: req.ID  // Link it to the corresponding RequestDetails
                 });
-                let nice = await SELECT.from(Workflows).where({ 'requestDetails_ID': req.ID });
-                console.log(nice)
+                // let nice = await SELECT.from(Workflows).where({ 'requestDetails_ID': req.ID });
+                // console.log(nice)
             } catch (error) {
                 console.log(error)
             }
