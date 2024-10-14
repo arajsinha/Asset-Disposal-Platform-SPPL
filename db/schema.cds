@@ -63,6 +63,7 @@ entity AssetDetails : cuid, managed {
     scrapValue        : Decimal(24, 3) @title: 'Salvage Value';
     requestDetails    : Association to one RequestDetails;
     Currency          : String(5)      @title: 'Currency';
+    virtual salvageMandatory: String(1);
 }
 
 entity AuditTrail : cuid, managed {

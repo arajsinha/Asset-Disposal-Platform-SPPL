@@ -4,12 +4,15 @@ annotate service.RequestDetails actions {
     void @Common.IsActionCritical;
 }
 
+annotate service.inText : comment with @Common.Label: 'Comment Reason For Voiding';
+
 annotate service.RequestDetails with @(
-    UI.UpdateHidden  : {$edmJson: {$Ne: [
+    UI.DeleteHidden                       : true,
+    UI.UpdateHidden                       : {$edmJson: {$Ne: [
         {$Path: 'canEdit'},
         true
     ]}},
-    UI.LineItem      : [
+    UI.LineItem                           : [
         {
             $Type: 'UI.DataField',
             Value: date,
@@ -31,7 +34,7 @@ annotate service.RequestDetails with @(
             Value: RequestStatus_id,
         }
     ],
-    UI.Identification: [
+    UI.Identification                     : [
         {
             $Type        : 'UI.DataFieldForAction',
             Action       : 'AssetDisposal.withdraw',
@@ -54,25 +57,20 @@ annotate service.RequestDetails with @(
             ]}}
         },
     ],
-    UI.SelectionPresentationVariant #table : {
-        $Type : 'UI.SelectionPresentationVariantType',
-        PresentationVariant : {
-            $Type : 'UI.PresentationVariantType',
-            Visualizations : [
-                '@UI.LineItem',
-            ],
-            SortOrder : [
-                {
-                    $Type : 'Common.SortOrderType',
-                    Property : createdAt,
-                    Descending : true,
-                },
-            ],
+    UI.SelectionPresentationVariant #table: {
+        $Type              : 'UI.SelectionPresentationVariantType',
+        PresentationVariant: {
+            $Type         : 'UI.PresentationVariantType',
+            Visualizations: ['@UI.LineItem', ],
+            SortOrder     : [{
+                $Type     : 'Common.SortOrderType',
+                Property  : createdAt,
+                Descending: true,
+            }, ],
         },
-        SelectionVariant : {
-            $Type : 'UI.SelectionVariantType',
-            SelectOptions : [
-            ],
+        SelectionVariant   : {
+            $Type        : 'UI.SelectionVariantType',
+            SelectOptions: [],
         },
     },
 );
@@ -201,8 +199,10 @@ annotate service.AssetDetails with @(UI.LineItem #Assets: [
         Value: disposalMethod,
     },
     {
-        $Type: 'UI.DataField',
-        Value: scrapValue,
+        $Type               : 'UI.DataField',
+        Value               : scrapValue,
+        // ![@Common.FieldControl] : { $edmJson : {$If : [ { $Eq : [ { $Path : 'salvageMandatory'},  ]}, 7, 3 ]}},
+        // @Common.FieldControl : salvageMandatory
     },
     {
         $Type: 'UI.DataField',
@@ -392,8 +392,8 @@ annotate service.RequestDetails with {
 
 
 annotate service.RequestDetails with {
- RequestStatus @(
-        Common.Text                    : {
+    RequestStatus @(
+        Common.Text        : {
             $value                : RequestStatus.name,
             ![@UI.TextArrangement]: #TextOnly
         },
@@ -409,9 +409,9 @@ annotate service.RequestDetails with {
     requestorName @Common.FieldControl: #ReadOnly
 };
 
-annotate service.AssetDetails with {
-    scrapValue @Common.FieldControl: #Mandatory
-};
+// annotate service.AssetDetails with {
+//     scrapValue @Common.FieldControl:
+// };
 
 annotate service.AssetDetails with {
     disposalMethod @(

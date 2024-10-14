@@ -12,6 +12,7 @@ module.exports = class AssetDisposal extends cds.ApplicationService {
         let workflowID = null
 
         const fixa = await cds.connect.to('YY1_FIXED_ASSET');
+        const taskUI = await cds.connect.to('AssetDisposalTaskUI');
 
         this.on('READ', 'YY1_FIXED_ASSETS_CC', async req => {
             let ans = await fixa.run(req.query);
@@ -21,18 +22,13 @@ module.exports = class AssetDisposal extends cds.ApplicationService {
 
         this.on('READ', 'AssetDisposal.Departments', async (req) => {
             console.log('Depts');
-
             try {
-
                 let data = await SELECT.from(Departments)
                     .columns(r => {
                         r`.*`,
                             r.users`.*`
                     })
                     .where(`users.email = 'aryan.raj.sinha@sap.com'`);
-
-                // Log the data
-                console.log(data);
                 return data;
             } catch (error) {
                 console.error('Error fetching departments:', error);
@@ -50,15 +46,6 @@ module.exports = class AssetDisposal extends cds.ApplicationService {
                         r.costCenters(cc => { cc`.*` })
                 }).where({ ID: departmentId })
             const costCentersArray = data[0].costCenters.map(center => center.costCenter);
-
-            // let assetDataCount = await fixa.run(
-            //     SELECT.from(YY1_FIXED_ASSETS_CC)
-            //     .columns(`count(*) as totalrows`)
-            //         .where({
-            //             'CostCenter': { in: costCentersArray },
-            //             'ValidityEndDate': '9999-12-31' // Additional AND condition
-            //         })
-            // );
             let assetData = await fixa.run(
                 SELECT.from(YY1_FIXED_ASSETS_CC)
                     .where({
@@ -68,7 +55,6 @@ module.exports = class AssetDisposal extends cds.ApplicationService {
                 // .limit(req.query.SELECT.limit.offset.val, req.query.SELECT.limit.rows.val)
             );
             const finalAssetData = assetData.map((center) => { return { assetNumber: center.FixedAssetExternalID, costCenter: center.CostCenter } });
-            // console.log(req.query);
             return finalAssetData;
         });
 
@@ -79,60 +65,48 @@ module.exports = class AssetDisposal extends cds.ApplicationService {
                 let tasks = await approval.send({
                     method: 'GET', path: `/workflow/rest/v1/task-instances?workflowInstanceId=${workflows.currentWorkflowID}`
                 });
-                for (task in tasks){
-                    if (task.status != 'COMPLETED') {
-                        await approval.send({
-                            method: 'PATCH', path: '/workflow/rest/v1/task-instances/' + task.id, data: {
-                                "status": "COMPLETED",
-                                "decision": "void",
-                                "approver": req.user.id
-                            }
+                // tasks.forEach(async (task) => {
+                for (const task of tasks) {
+                    if (task.status !== 'COMPLETED') {
+                        // await approval.send({
+                        //     method: 'PATCH',
+                        //     path: '/workflow/rest/v1/task-instances/' + task.id,
+                        //     data: {
+                        //         "status": "COMPLETED",
+                        //         "decision": "void",
+                        //         "approver": req.user.id
+                        //     }
+                        // });
+
+                        await INSERT.into(AuditTrail).entries({
+                            taskID: task.id,
+                            taskDescription: task.subject,
+                            taskType: "NICE",
+                            subject: task.subject,
+                            comment: req.data.text,
+                            status: task.status,
+                            workflowID: workflows.currentWorkflowID,
+                            hasVoid: false
                         })
+                        // await taskUI.send('addAuditTrial', {
+                        //     taskID: task.id,
+                        //     taskName: "TaskName",
+                        //     taskType: "Task Type",
+                        //     taskTitle: "Task Title",
+                        //     workflowId: workflows.currentWorkflowID,
+                        //     comment: req.data.text,
+                        //     status: "Void",
+                        //     hasVoid: false
+                        // });
                     }
                 }
 
                 // Update the request status to Void
                 await UPDATE.entity(RequestDetails).set({ 'RequestStatus_id': "VOD" }).where({ 'ID': req.params[0].ID });
+
             }
             catch {
                 console.log(error)
-            }
-        })
-
-        this.after("READ", "RequestDetails.drafts", async (results, req) => {
-            for (const result of results) {
-                result.canVoid = false; //default values
-                result.canEdit = false; //default values
-                result.canWithdraw = false; //default values
-            }
-        });
-
-        this.after("READ", "RequestDetails", async (results, req) => {
-            if (req?.data?.ID) {
-                for (const result of results) {
-                    result.canEdit = true; //default values
-                    result.canVoid = false; //default values
-                    result.canWithdraw = true; //default values
-                    let reqDetail = await SELECT.one.from(RequestDetails).where({ 'ID': result.ID });
-                    let auditTrail = await SELECT.from(AuditTrail).where({ 'requestDetails_ID': result.ID, 'workflows_ID': reqDetail.currentWorkflowID });
-                    if (auditTrail.length > 0) {
-                        result.canWithdraw = false
-                        result.canEdit = false
-                    }
-                    for (const data of auditTrail) {
-                        if (req.user.id === data.approver && data.status != 'Void' && data.hasVoid) {
-                            result.canVoid = true;
-                        }
-                        if (data.status == 'Void') {
-                            result.canEdit = false;
-                            result.canWithdraw = false;
-                        }
-                        if ((data.taskType == 'Verified By' || data.taskType == 'Checked By' || data.taskType == 'Supported By' || data.taskType == 'Endorsed By' || data.taskType == 'Approved By') && data.status == 'Rejected') {
-                            result.canEdit = true;
-                            result.canWithdraw = true;
-                        }
-                    }
-                }
             }
         })
 
@@ -155,19 +129,64 @@ module.exports = class AssetDisposal extends cds.ApplicationService {
             }
         })
 
+        this.after("READ", "RequestDetails.drafts", async (results, req) => {
+            for (const result of results) {
+                result.canVoid = false; //default values
+                result.canEdit = false; //default values
+                result.canWithdraw = false; //default values
+            }
+        });
+
+        this.after("READ", "RequestDetails", async (results, req) => {
+            if (req?.data?.ID) {
+                for (const result of results) {
+                    result.canEdit = false; //default values
+                    result.canVoid = false; //default values
+                    result.canWithdraw = false; //default values
+                    let reqDetail = await SELECT.one.from(RequestDetails).columns(r => {
+                        r`.*`,
+                            r.RequestStatus(cc => { cc`.*` })
+                    }).where({ 'ID': result.ID });
+                    let auditTrail = await SELECT.from(AuditTrail).where({ 'requestDetails_ID': result.ID, 'workflows_ID': reqDetail.currentWorkflowID });
+                    if (auditTrail.length == 0) result.canWithdraw = true
+
+                    if (reqDetail.RequestStatus_id == 'REJ' || reqDetail.RequestStatus_id == 'WTD') {
+                        result.canEdit = true;
+                    }
+                    if (reqDetail.RequestStatus_id === 'INP')
+                        for (const data of auditTrail) {
+                            if (req.user.id === data.approver && data.status != 'Void' && data.hasVoid) {
+                                result.canVoid = true;
+                            }
+                        }
+                }
+            }
+        })
+
+        // this.on('sideEffectDisposalAction', "AssetDetails.drafts", async (req) => {
+        //     let ans = await SELECT.one.from(AssetDetails.drafts).where({ 'ID': req.params[1].ID })
+        //     console.log(ans.disposalMethod)
+        // })
+
+        // this.after("READ", "AssetDetails.drafts", async (results, req) => {
+        //     for (const result of results) {
+        //         result.salvageMandatory = '3'; //default values
+        //         if (result.disposalMethod == 'Disposal') {
+        //             result.salvageMandatory = '7'
+        //         }
+        //     }
+        // });
+
         this.on('sideEffectTriggerAction', "AssetDetails.drafts", async (req) => {
             let ans = await SELECT.one.from(AssetDetails.drafts).where({ 'ID': req.params[1].ID })
-            console.log(ans)
             const nbv = await cds.connect.to("ASSET_BALANCE")
             let now = new Date().toISOString().split('.')[0];
             let formattedDate = `datetime'${now.replace('Z', '')}'`;
-            console.log(formattedDate)
             let NBVvalues = {
                 AssetAccountingKeyFigureSet: "ABS_DEF",
                 FiscalYear: "2024",
                 FiscalPeriod: "12",
                 KeyDate: formattedDate,
-                MasterFixedAsset: 'nice',
                 AssetDepreciationArea: '01',
                 CurrencyRole: '10',
                 Ledger: '0L',
@@ -215,66 +234,7 @@ module.exports = class AssetDisposal extends cds.ApplicationService {
             // req.user.id
         });
 
-        // this.after("READ", "RequestDetails", async (req, next) => {
-        //     console.log(req)
-        //     const approval = await cds.connect.to("spa-process-automation")
-        //     try {
-        //         let objectData = await SELECT.from(Workflows).where({ 'requestDetails_ID': req[0].ID });
-        //         // Loop through each objectData to get workflowID and make API calls
-        //         for (const workflow of objectData) {
-        //             if (workflow.workflowID) {
-        //                 try {
-        //                     // Call the external API with the current workflowID
-        //                     let res = await approval.send({
-        //                         method: 'GET',
-        //                         path: '/workflow/rest/v1/workflow-instances/' + workflow.workflowID + '/execution-logs'
-        //                     });
-
-        //                     // Log the response from the API call
-        //                     console.log(`Workflow ID: ${workflow.workflowID}, Execution Logs:`, res);
-        //                     for (const task of res) {
-        //                         // Check if the task already exists in the AuditTrail
-        //                         const existingTask = await SELECT.one.from(AuditTrail).where({ taskID: task.id });
-        //                         if (!existingTask && task.type != 'WORKFLOW_STARTED' && task.type != 'EXCLUSIVE_GATEWAY_REACHED') {
-        //                             let recipientsString = task.recipientUsers.join(', ');
-        //                             let recipientsGroupString = task.recipientGroups.join(', ');
-        //                             if (task.recipientGroups.length == 0) recipientsGroupString = ''
-
-        //                             // #### -> We should remove this code right? ####
-        //                             await INSERT.into(AuditTrail).entries({
-        //                                 taskID: task.id,
-        //                                 type: task.type,
-        //                                 timestamp: task.timestamp,
-        //                                 subject: task.subject,
-        //                                 // recipientUsers: recipientsString,
-        //                                 // recipientGroups: recipientsGroupString,
-        //                                 workflows_ID: workflow.workflowID,
-        //                                 requestDetails_ID: req[0].ID,
-        //                             });
-        //                         }
-        //                     }
-        //                     // let data = await SELECT.from(AuditTrail);
-        //                 } catch (apiError) {
-        //                     console.log(`Error fetching execution logs for workflowID ${workflow.workflowID}:`, apiError);
-        //                 }
-        //             }
-        //         }
-        //         // if (objectData[0].workflowID) {
-        //         //     let res = await approval.send({
-        //         //         method: 'GET', path: '/workflow/rest/v1/workflow-instances/' + objectData[0].workflowID + '/execution-logs'
-        //         //     })
-        //         //     console.log(res)
-        //         // }
-        //         // console.log(cancel)
-        //         // workflowID = res.id
-        //         // await UPDATE.entity(RequestDetails).set({'workflowID': res.id}).where({ 'objectID': req.objectID });
-
-        //     } catch (error) {
-        //         console.log(error)
-        //     }
-        // })
-
-        this.after("CREATE", "RequestDetails", async (req) => {
+        this.after(["CREATE", "UPDATE"], "RequestDetails", async (req) => {
             let data = await SELECT.from(RequestDetails)
                 .columns(r => {
                     r`.*`,
@@ -303,20 +263,13 @@ module.exports = class AssetDisposal extends cds.ApplicationService {
             // Assign the calculated values
             req.totalPurchaseCost = result.total.toFixed(3);
             req.maxPurchaseCost = result.max.toFixed(3);
-            // await UPDATE.entity(RequestDetails).set({ 'totalPurchaseCost': req.totalPurchaseCost }).where({ 'ID': req.ID })
+
             let workflowContext = {}
             workflowContext.objectid = req.ID;
             let deptName = await SELECT.from(Departments).where({ 'ID': req.department_ID });
             workflowContext.departmentname = deptName[0].name;
             workflowContext.maxpurchasecost = Math.floor(req.maxPurchaseCost);
 
-            // Calculate totalPurchaseCost based on the sum of all assetPurchaseCosts
-            // workflowContext.totalpurchasecost = workflowContext.assetdetails.reduce((total, asset) => {
-            //     return total + asset.assetPurchaseCost;
-            // }, 0);
-            // req.totalPurchaseCost = workflowContext.assetdetails.reduce((total, asset) => {
-            //     return total + asset.assetPurchaseCost;
-            // }, 0);
             const approval = await cds.connect.to("spa-process-automation-tokenexchange")
             try {
                 let res = await approval.send({
@@ -327,12 +280,6 @@ module.exports = class AssetDisposal extends cds.ApplicationService {
                     }
                 })
                 console.log(res)
-                // console.log(cancel)
-                // workflowID = res.id
-                // await UPDATE.entity(Workflows).set({ 'ID': res.id }).where({ 'RequestDetailsID': req.ID });
-                // await UPDATE.entity(Workflows).set({ 'RequestDetailsID': res.id }).where({ 'ID': req.ID });
-                // Insert a new Workflow entry linked to the given RequestID
-                // await UPDATE.entity(RequestDetails).set({ currentWorkflowID: res.id })
                 await UPDATE.entity(RequestDetails).set(
                     {
                         'totalPurchaseCost': req.totalPurchaseCost,
@@ -344,68 +291,9 @@ module.exports = class AssetDisposal extends cds.ApplicationService {
                     workflowID: res.id,  // The new workflowID to be added
                     requestDetails_ID: req.ID  // Link it to the corresponding RequestDetails
                 });
-                // let nice = await SELECT.from(Workflows).where({ 'requestDetails_ID': req.ID });
-                // console.log(nice)
             } catch (error) {
                 console.log(error)
             }
-        });
-
-        this.after("UPDATE", "RequestDetails", async (req) => {
-            // console.log(workflowID)
-            // let workflows = await SELECT.from(Workflows).where({ 'requestDetails_ID': req.ID });
-            // obj = []
-            // obj.push(req)
-            // let workflowLength = (workflows.length - 1)
-            const approval = await cds.connect.to("spa-process-automation-tokenexchange")
-            // try {
-            //     let cancel = await approval.send({
-            //         method: 'PATCH', path: '/workflow/rest/v1/workflow-instances/' + workflows[workflowLength].workflowID, data: {
-            //             "definitionId": "eu10.sap-process-automation-tfe.singaporepoolsassets.assetDisposalApproval",
-            //             "status": "CANCELED"
-            //         }
-            //     })
-            // }
-            // catch {
-            //     console.log(error)
-            // }
-
-            let workflowContext = {}
-            workflowContext.objectid = req.ID;
-
-            // Calculate totalPurchaseCost based on the sum of all assetPurchaseCosts
-            // workflowContext.totalpurchasecost = workflowContext.assetdetails.reduce((total, asset) => {
-            //     return total + asset.assetPurchaseCost;
-            // }, 0);
-
-            // await UPDATE.entity(RequestDetails).set({ 'totalPurchaseCost': req.totalPurchaseCost }).where({ 'ID': req.ID });
-
-
-            try {
-                let res = await approval.send({
-                    method: 'POST', path: '/workflow/rest/v1/workflow-instances', data:
-                    {
-                        "definitionId": "eu10.sap-process-automation-tfe.singaporepoolsassets.assetDisposalApproval",
-                        "context": workflowContext
-                    }
-                })
-                // console.log(cancel)
-                // console.log(res)
-                await UPDATE.entity(RequestDetails).set(
-                    {
-                        "currentWorkflowID": res.id,
-                        "RequestStatus_id": "INP"
-                    }).where({ 'ID': req.ID });
-
-                await INSERT.into(Workflows).entries({
-                    workflowID: res.id,  // The new workflowID to be added
-                    requestDetails_ID: req.ID  // Link it to the corresponding RequestDetails
-                });
-                // let data = await SELECT.from(Workflows).where({ 'requestDetails_ID': req.ID });
-            } catch (error) {
-                console.log(error)
-            }
-
         });
 
         return super.init()

@@ -3,7 +3,6 @@ using deptassets from '../db/department_maintenance';
 
 // namespace sap.fe.core;
 
-
 service DepartmentMaintenance {
   entity Users       as projection on deptassets.Users;
 
@@ -14,25 +13,37 @@ service DepartmentMaintenance {
 }
 
 service AssetDisposal {
+
+  type inText : {
+    comment : String;
+  };
+
   @odata.draft.enabled
   entity RequestDetails      as projection on spassets.RequestDetails
+
+
     actions {
       @(
         cds.odata.bindingparameter.name: 'in',
         Common.SideEffects             : {TargetProperties: ['in/RequestStatus_id']}
       )
       action withdraw();
+
       @(
         cds.odata.bindingparameter.name: 'in',
-        Common.SideEffects             : {TargetProperties: ['in/RequestStatus_id']}
+        Common.SideEffects             : {TargetProperties: [
+          'in/RequestStatus_id',
+          'in/canVoid'
+        ]}
       )
-      action void();
+      action void(text : inText:comment);
     }
 
   // @odata.draft.enabled
   entity AssetDetails        as projection on spassets.AssetDetails
     actions {
       action sideEffectTriggerAction();
+      action sideEffectDisposalAction();
     };
 
   annotate AssetDetails with @(Common: {SideEffects #triggerActionProperty: {
@@ -49,6 +60,13 @@ service AssetDisposal {
       'netBookValue'
     ],
     TriggerAction   : 'AssetDisposal.sideEffectTriggerAction'
+  }});
+
+  annotate AssetDetails with @(Common: {SideEffects: {
+    SourceProperties: [disposalMethod],
+    TargetProperties: [
+      'salvageMandatory',
+    ]
   }});
 
   entity DisposalMethod      as projection on spassets.DisposalMethod;
