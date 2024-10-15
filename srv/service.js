@@ -36,26 +36,30 @@ module.exports = class AssetDisposal extends cds.ApplicationService {
         });
 
         this.on('READ', 'DepartmentAssets', async (req) => {
-            let departmentId;
+            let department_name;
             if (req.query.SELECT.where?.[0].ref?.[0] === "department") {
-                departmentId = req.query.SELECT.where?.[2].val;
+                department_name = req.query.SELECT.where?.[2].val;
             }
             let data = await SELECT.from(Departments)
                 .columns(r => {
                     r`.*`,
                         r.costCenters(cc => { cc`.*` })
-                }).where({ ID: departmentId })
+                }).where({ name: department_name })
             const costCentersArray = data[0].costCenters.map(center => center.costCenter);
-            let assetData = await fixa.run(
-                SELECT.from(YY1_FIXED_ASSETS_CC)
-                    .where({
-                        'CostCenter': { in: costCentersArray },
-                        'ValidityEndDate': '9999-12-31' // Additional AND condition
-                    })
-                // .limit(req.query.SELECT.limit.offset.val, req.query.SELECT.limit.rows.val)
-            );
-            const finalAssetData = assetData.map((center) => { return { assetNumber: center.FixedAssetExternalID, costCenter: center.CostCenter } });
-            return finalAssetData;
+            if (costCentersArray.length > 0) {
+                let assetData = await fixa.run(
+                    SELECT.from(YY1_FIXED_ASSETS_CC)
+                        .where({
+                            'CostCenter': { in: costCentersArray },
+                            'ValidityEndDate': '9999-12-31' // Additional AND condition
+                        })
+                    // .limit(req.query.SELECT.limit.offset.val, req.query.SELECT.limit.rows.val)
+                );
+                const finalAssetData = assetData.map((center) => { return { assetNumber: center.FixedAssetExternalID, costCenter: center.CostCenter } });
+                return finalAssetData;
+            } else {
+                return [];
+            }
         });
 
         this.on('void', "RequestDetails", async (req) => {
@@ -266,7 +270,7 @@ module.exports = class AssetDisposal extends cds.ApplicationService {
 
             let workflowContext = {}
             workflowContext.objectid = req.ID;
-            let deptName = await SELECT.from(Departments).where({ 'ID': req.department_ID });
+            let deptName = await SELECT.from(Departments).where({ 'name': data[0].department_name });
             workflowContext.departmentname = deptName[0].name;
             workflowContext.maxpurchasecost = Math.floor(req.maxPurchaseCost);
 

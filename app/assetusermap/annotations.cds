@@ -5,9 +5,12 @@ annotate service.Departments with @(
         Data : [
             {
                 $Type : 'UI.DataField',
-                Label : 'Department Name',
                 Value : name,
             },
+            {
+                $Type : 'UI.DataField',
+                Value : descr,
+            }
         ],
     },
     UI.Facets : [
@@ -33,14 +36,16 @@ annotate service.Departments with @(
     UI.LineItem : [
         {
             $Type : 'UI.DataField',
-            Label : ' Department Name',
             Value : name,
+        },        {
+            $Type : 'UI.DataField',
+            Value : descr,
         },
     ],
     UI.HeaderInfo : {
         Title : {
             $Type : 'UI.DataField',
-            Value : name,
+            Value : descr,
         },
         TypeName : '',
         TypeNamePlural : '',
@@ -52,19 +57,16 @@ annotate service.Users with @(
         {
             $Type : 'UI.DataField',
             Value : department_ID,
-            Label : 'Department ID',
         },
         {
             $Type : 'UI.DataField',
             Value : email,
-            Label : 'Email ID',
         },
     ],
     UI.LineItem #Users : [
         {
             $Type : 'UI.DataField',
             Value : email,
-            Label : 'Email ID',
         },
     ],
 );
@@ -74,14 +76,12 @@ annotate service.CostCenters with @(
         {
             $Type : 'UI.DataField',
             Value : department.costCenters.costCenter,
-            Label : 'Cost Center',
         },
     ],
     UI.LineItem #CostCenters : [
         {
             $Type : 'UI.DataField',
             Value : costCenter,
-            Label : 'Cost Center',
         },
     ],
 );

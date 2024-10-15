@@ -85,7 +85,7 @@ annotate service.RequestDetails with @(
             },
             {
                 $Type: 'UI.DataField',
-                Value: department_ID,
+                Value: department_name,
             },
             {
                 $Type: 'UI.DataField',
@@ -444,7 +444,7 @@ annotate service.AssetDetails with {
                 {
                     $Type            : 'Common.ValueListParameterIn',
                     ValueListProperty: 'department',
-                    LocalDataProperty: requestDetails.department_ID,
+                    LocalDataProperty: requestDetails.department_name,
                 },
                 {
                     $Type            : 'Common.ValueListParameterDisplayOnly',
@@ -458,18 +458,18 @@ annotate service.AssetDetails with {
 };
 
 annotate service.RequestDetails with {
-    department @(
+    department_name @(
         Common.Text                    : {
-            $value                : department.name,
-            ![@UI.TextArrangement]: #TextOnly
+            $value                : department.descr,
+            ![@UI.TextArrangement]: #TextFirst
         },
         Common.ValueList               : {
             $Type         : 'Common.ValueListType',
             CollectionPath: 'Departments',
             Parameters    : [{
                 $Type            : 'Common.ValueListParameterInOut',
-                LocalDataProperty: department_ID,
-                ValueListProperty: 'ID',
+                LocalDataProperty: department_name,
+                ValueListProperty: 'name',
             }, ],
         },
         Common.ValueListWithFixedValues: true,
@@ -483,3 +483,10 @@ annotate service.Departments with {
         ![@UI.TextArrangement]: #TextOnly,
     }
 };
+annotate service.Departments with {
+    name @Common.Text : {
+        $value : descr,
+        ![@UI.TextArrangement] : #TextFirst,
+    }
+};
+

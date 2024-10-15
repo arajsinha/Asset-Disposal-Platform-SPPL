@@ -15,7 +15,8 @@ entity YY1_FIXED_ASSETS_CC as projection on fixedasset.YY1_FIXED_ASSETS_CC;
 entity RequestDetails : cuid, managed {
     date              : Date                                      @title: 'Date';
     requestorName     : String(100)                               @title: 'Requestor Name';
-    department        : Association to one deptassets.Departments @title: 'Department';
+    department        : Association to one deptassets.Departments on department.name = department_name;
+    department_name     : String(20)  @title: 'Department';
     totalPurchaseCost : String(100)                               @title: 'Total Purchase Cost';
     currentWorkflowID : String(36);
     assetDetails      : Composition of many AssetDetails
@@ -84,7 +85,7 @@ entity AuditTrail : cuid, managed {
 // Department Assets
 @cds.persistence.skip
 entity DepartmentAssets {
-    key department  : UUID       @title: 'Department ID';
+    key department  : String(20)       @title: 'Department ID';
     key assetNumber : String(19) @title: 'Asset Number';
         costCenter  : String(12) @title: 'Cost Center';
 }
