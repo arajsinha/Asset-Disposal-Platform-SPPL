@@ -82,16 +82,29 @@ module.exports = class AssetDisposal extends cds.ApplicationService {
                         //     }
                         // });
 
-                        await INSERT.into(AuditTrail).entries({
+                        // await INSERT.into(AuditTrail).entries({
+                        //     requestId: req.params[0].ID,
+                        //     taskID: task.id,
+                        //     taskDescription: task.subject,
+                        //     taskType: "NICE",
+                        //     subject: task.subject,
+                        //     comment: req.data.text,
+                        //     status: "Void",
+                        //     workflowID: workflows.currentWorkflowID,
+                        //     hasVoid: false
+                        // })
+
+                        await taskUI.send('addAuditTrial', "AssetDisposalTaskUI.RequestDetails", {
+                            requestId: req.params[0].ID,
                             taskID: task.id,
-                            taskDescription: task.subject,
-                            taskType: "NICE",
-                            subject: task.subject,
+                            taskName: task.subject,
+                            taskType: "Complete Workflow",
+                            taskTitle: task.subject,
                             comment: req.data.text,
-                            status: task.status,
-                            workflowID: workflows.currentWorkflowID,
+                            status: "Void",
+                            workflowId: workflows.currentWorkflowID,
                             hasVoid: false
-                        })
+                        });
                         // await taskUI.send('addAuditTrial', {
                         //     taskID: task.id,
                         //     taskName: "TaskName",
@@ -117,20 +130,31 @@ module.exports = class AssetDisposal extends cds.ApplicationService {
         this.on('withdraw', "RequestDetails", async (req) => {
             const approval = await cds.connect.to("spa-process-automation-tokenexchange")
             let workflows = await SELECT.one.from(RequestDetails).where({ 'ID': req.params[0].ID });
-            try {
-                await approval.send({
-                    method: 'PATCH', path: '/workflow/rest/v1/workflow-instances/' + workflows.currentWorkflowID, data: {
-                        "definitionId": "eu10.sap-process-automation-tfe.singaporepoolsassets.assetDisposalApproval",
-                        "status": "CANCELED"
-                    }
-                })
-
-                // Update the request status to withdrawn
-                await UPDATE.entity(RequestDetails).set({ 'RequestStatus_id': "WTD" }).where({ 'ID': req.params[0].ID });
+            let tasks = await approval.send({
+                method: 'GET', path: `/workflow/rest/v1/task-instances?workflowInstanceId=${workflows.currentWorkflowID}`
+            });
+            // tasks.forEach(async (task) => {
+            for (const task of tasks) {
+                await taskUI.send('addAuditTrial', "AssetDisposalTaskUI.RequestDetails", {
+                    requestId: req.params[0].ID,
+                    taskID: task.id,
+                    taskName: task.subject,
+                    taskType: "Complete Workflow",
+                    taskTitle: task.subject,
+                    comment: req.data.text,
+                    status: "Withdrawn",
+                    workflowId: workflows.currentWorkflowID,
+                    hasVoid: false
+                });
             }
-            catch {
-                console.log(error)
-            }
+            await approval.send({
+                method: 'PATCH', path: '/workflow/rest/v1/workflow-instances/' + workflows.currentWorkflowID, data: {
+                    "definitionId": "eu10.sap-process-automation-tfe.singaporepoolsassets.assetDisposalApproval",
+                    "status": "CANCELED"
+                }
+            })
+            // Update the request status to withdrawn
+            await UPDATE.entity(RequestDetails).set({ 'RequestStatus_id': "WTD" }).where({ 'ID': req.params[0].ID });
         })
 
         this.after("READ", "RequestDetails.drafts", async (results, req) => {

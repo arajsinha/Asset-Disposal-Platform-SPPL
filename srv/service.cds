@@ -25,9 +25,9 @@ service AssetDisposal {
     actions {
       @(
         cds.odata.bindingparameter.name: 'in',
-        Common.SideEffects             : {TargetProperties: ['in/RequestStatus_id']}
+        Common.SideEffects             : {TargetProperties: ['in/RequestStatus_id', 'in/canWithdraw']}
       )
-      action withdraw();
+      action withdraw(text : inText:comment);
 
       @(
         cds.odata.bindingparameter.name: 'in',
