@@ -14,9 +14,10 @@ service DepartmentMaintenance {
 
 service AssetDisposal {
 
-  type inVoid : {
+  type inVoid     : {
     comment : String;
   };
+
   type inWithdraw : {
     comment : String;
   };
@@ -28,7 +29,11 @@ service AssetDisposal {
     actions {
       @(
         cds.odata.bindingparameter.name: 'in',
-        Common.SideEffects             : {TargetProperties: ['in/RequestStatus_id', 'in/canWithdraw']}
+        Common.SideEffects             : {TargetProperties: [
+          'in/RequestStatus_id',
+          'in/canWithdraw',
+          'in/canEdit'
+        ]}
       )
       action withdraw(text : inWithdraw:comment);
 
@@ -36,7 +41,8 @@ service AssetDisposal {
         cds.odata.bindingparameter.name: 'in',
         Common.SideEffects             : {TargetProperties: [
           'in/RequestStatus_id',
-          'in/canVoid'
+          'in/canVoid',
+          'in/canEdit'
         ]}
       )
       action void(text : inVoid:comment);
@@ -68,9 +74,7 @@ service AssetDisposal {
 
   annotate AssetDetails with @(Common: {SideEffects: {
     SourceProperties: [disposalMethod],
-    TargetProperties: [
-      'salvageMandatory',
-    ]
+    TargetProperties: ['salvageMandatory', ]
   }});
 
   entity DisposalMethod      as projection on spassets.DisposalMethod;

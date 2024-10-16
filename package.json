@@ -101,6 +101,16 @@
             "destination": "SingPoolsS4HANA"
           }
         }
+      },
+      "ASSET_RETIRE": {
+        "kind": "odata",
+        "model": "srv/external/ASSET_RETIRE",
+        "csrf": true,
+        "csrfInBatch": true,
+        "credentials": {
+          "path": "/sap/opu/odata4/sap/api_fixedassetretirement/srvd_a2x/sap/fixedassetretirement/0001",
+          "destination": "SingPoolsS4HANA"
+        }
       }
     }
   },
