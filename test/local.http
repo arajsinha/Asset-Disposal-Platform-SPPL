@@ -94,3 +94,97 @@ Authorization: Bearer {{oauth_token}}
 {
   "status": "CANCELED"
 }
+
+###
+GET https://my301971-api.s4hana.ondemand.com//sap/opu/odata4/sap/api_fixedassetretirement/srvd_a2x/sap/fixedassetretirement/0001/FixedAssetRetirement/
+Content-Type: application/json
+x-csrf-token: Fetch
+Authorization: Basic ARAJSINHA:jMWwWMzjYyAvuzWHfrvVDW+lnuGZTNYZawPFg9ux
+
+
+//With Revenue (Write off)
+###
+POST https://my301971-api.s4hana.ondemand.com/sap/opu/odata4/sap/api_fixedassetretirement/srvd_a2x/sap/fixedassetretirement/0001/FixedAssetRetirement/SAP__self.Post
+Content-Type: application/json
+x-csrf-token: tbQQ9kS5ln-nCefXLN4V7g==
+Authorization: Basic ARAJSINHA:jMWwWMzjYyAvuzWHfrvVDW+lnuGZTNYZawPFg9ux
+
+{
+   "ReferenceDocumentItem": "1",
+   "CompanyCode": "2000",
+   "BusinessTransactionType": "RA20",
+   "MasterFixedAsset": "613944",
+   "FixedAsset": "0",
+   "DocumentDate": "2024-10-15",
+   "PostingDate": "2024-10-15",
+   "AssetValueDate": "2024-10-15",
+   "FxdAstRetirementRevenueType": "1",
+   "AstRevenueAmountInTransCrcy": 1000.00,
+   "FxdAstRtrmtRevnTransCrcy": "SGD",
+   "FxdAstRtrmtRevnCurrencyRole": "10",
+   "FixedAssetRetirementType": "1"
+}
+
+//Without Revenue (Disposal)
+###
+POST https://my301971-api.s4hana.ondemand.com/sap/opu/odata4/sap/api_fixedassetretirement/srvd_a2x/sap/fixedassetretirement/0001/FixedAssetRetirement/SAP__self.Post
+Content-Type: application/json
+x-csrf-token: tbQQ9kS5ln-nCefXLN4V7g==
+Authorization: Basic ARAJSINHA:jMWwWMzjYyAvuzWHfrvVDW+lnuGZTNYZawPFg9ux
+
+{
+   "ReferenceDocumentItem": "1",
+   "CompanyCode": "2000",
+   "BusinessTransactionType": "RA21",
+   "MasterFixedAsset": "617202",
+   "FixedAsset": "0",
+   "DocumentDate": "2024-10-15",
+   "PostingDate": "2024-10-15",
+   "AssetValueDate": "2024-10-15",
+   "FixedAssetRetirementType": "1"
+}
+
+###
+GET https://my301971-api.s4hana.ondemand.com/sap/opu/odata4/sap/api_fixedassetretirement/srvd_a2x/sap/fixedassetretirement/0001/FixedAssetRetirement/017fd645-7c43-1eef-a2da-c121c1967cc6/1
+Content-Type: application/json
+Authorization: Basic ARAJSINHA:jMWwWMzjYyAvuzWHfrvVDW+lnuGZTNYZawPFg9ux
+
+# {
+#    "ReferenceDocumentItem": "string",
+#    "BusinessTransactionType": "string",
+#    "CompanyCode": "string",
+#    "MasterFixedAsset": "string",
+#    "FixedAsset": "string",
+#    "DocumentDate": "2017-04-13",
+#    "PostingDate": "2017-04-13",
+#    "AssetValueDate": "2017-04-13",
+#    "FxdAstRetirementRevenueType": "string",
+#    "AstRevenueAmountInTransCrcy": 0,
+#    "FxdAstRtrmtRevnTransCrcy": "string",
+#    "FxdAstRtrmtRevnCurrencyRole": "string",
+#    "FxdAstRevnDetnDeprArea": "string",
+#    "FixedAssetRetirementType": "string",
+#    "AstRtrmtAmtInTransCrcy": 0,
+#    "FxdAstRetirementTransCrcy": "string",
+#    "FxdAstRetirementRatioInPercent": 0,
+#    "FixedAssetYearOfAcqnCode": "string",
+#    "DocumentReferenceID": "string",
+#    "AccountingDocumentHeaderText": "string",
+#    "FxdAstRtrmtQuantityInBaseUnit": 0,
+#    "BaseUnitSAPCode": "string",
+#    "BaseUnitISOCode": "string",
+#    "AccountingDocumentType": "string",
+#    "TradingPartner": "string",
+#    "AssignmentReference": "string",
+#    "DocumentItemText": "string",
+#    "_Ledger": [
+#       {
+#          "Ledger": "string",
+#          "_Valuation": [
+#             {
+#                "AssetDepreciationArea": "string"
+#             }
+#          ]
+#       }
+#    ]
+# }

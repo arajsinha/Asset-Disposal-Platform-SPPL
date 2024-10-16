@@ -51,9 +51,18 @@ annotate service.RequestDetails with @(
             Action       : 'AssetDisposal.void',
             Determining  : true,
             Label        : 'Void',
-            // ![@UI.Hidden] : canVoid
             ![@UI.Hidden]: {$edmJson: {$Ne: [
                 {$Path: 'canVoid'},
+                true
+            ]}}
+        },
+        {
+            $Type        : 'UI.DataFieldForAction',
+            Action       : 'AssetDisposal.retire',
+            Determining  : true,
+            Label        : 'Retire',
+            ![@UI.Hidden]: {$edmJson: {$Ne: [
+                {$Path: 'canRetire'},
                 true
             ]}}
         },

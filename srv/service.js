@@ -12,7 +12,8 @@ module.exports = class AssetDisposal extends cds.ApplicationService {
         let workflowID = null
 
         const fixa = await cds.connect.to('YY1_FIXED_ASSET');
-        const taskUI = await cds.connect.to('AssetDisposalTaskUI');
+        const retire = await cds.connect.to('ASSET_RETIRE');
+        // const taskUI = await cds.connect.to('AssetDisposalTaskUI');
 
         this.on('READ', 'YY1_FIXED_ASSETS_CC', async req => {
             let ans = await fixa.run(req.query);
@@ -72,15 +73,15 @@ module.exports = class AssetDisposal extends cds.ApplicationService {
                 // tasks.forEach(async (task) => {
                 for (const task of tasks) {
                     if (task.status !== 'COMPLETED') {
-                        // await approval.send({
-                        //     method: 'PATCH',
-                        //     path: '/workflow/rest/v1/task-instances/' + task.id,
-                        //     data: {
-                        //         "status": "COMPLETED",
-                        //         "decision": "void",
-                        //         "approver": req.user.id
-                        //     }
-                        // });
+                        await approval.send({
+                            method: 'PATCH',
+                            path: '/workflow/rest/v1/task-instances/' + task.id,
+                            data: {
+                                "status": "COMPLETED",
+                                "decision": "void",
+                                "approver": req.user.id
+                            }
+                        });
 
                         // await INSERT.into(AuditTrail).entries({
                         //     requestId: req.params[0].ID,
@@ -127,6 +128,47 @@ module.exports = class AssetDisposal extends cds.ApplicationService {
             }
         })
 
+        this.on('retire', "RequestDetails", async (req) => {
+            let assetDetails = await SELECT.one.from(RequestDetails).columns(r => {
+                r`.*`,
+                    r.assetDetails(cc => { cc`.*` })
+            }).where({ 'ID': req.params[0].ID });
+            const today = new Date();
+            const formattedDate = today.toISOString().split('T')[0];
+            let retireData = {
+                ReferenceDocumentItem: "1",
+                CompanyCode: "2000",
+                FixedAssetRetirementType: "1"
+            }
+            for (const asset of assetDetails.assetDetails) {
+                if (asset.disposalMethod == 'Write Off') {
+                    retireData.BusinessTransactionType = "RA20"
+                    retireData.FxdAstRetirementRevenueType = "1"
+                    retireData.AstRevenueAmountInTransCrcy = asset.scrapValue
+                    retireData.FxdAstRtrmtRevnTransCrcy = "SGD"
+                    retireData.FxdAstRtrmtRevnCurrencyRole = "10"
+                } else {
+                    retireData.BusinessTransactionType = "RA21"
+                }
+                retireData.MasterFixedAsset = asset.assetNumber.split("-")[0]
+                retireData.FixedAsset = asset.assetNumber.split("-")[1]
+                retireData.DocumentDate = formattedDate
+                retireData.PostingDate = formattedDate
+                retireData.AssetValueDate = formattedDate
+                let res = await retire.send({
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/xml' // Ensure content type is set correctly
+                    },
+                    path: `/FixedAssetRetirement/SAP__self.Post`,
+                    data: {
+                        retireData
+                    }
+                })
+                console.log(res)
+            }
+        })
+
         this.on('withdraw', "RequestDetails", async (req) => {
             const approval = await cds.connect.to("spa-process-automation-tokenexchange")
             let workflows = await SELECT.one.from(RequestDetails).where({ 'ID': req.params[0].ID });
@@ -162,33 +204,76 @@ module.exports = class AssetDisposal extends cds.ApplicationService {
                 result.canVoid = false; //default values
                 result.canEdit = false; //default values
                 result.canWithdraw = false; //default values
+                result.canRetire = false; //default values
             }
         });
 
-        this.after("READ", "RequestDetails", async (results, req) => {
-            if (req?.data?.ID) {
-                for (const result of results) {
-                    result.canEdit = false; //default values
-                    result.canVoid = false; //default values
-                    result.canWithdraw = false; //default values
-                    let reqDetail = await SELECT.one.from(RequestDetails).columns(r => {
-                        r`.*`,
-                            r.RequestStatus(cc => { cc`.*` })
-                    }).where({ 'ID': result.ID });
-                    let auditTrail = await SELECT.from(AuditTrail).where({ 'requestDetails_ID': result.ID, 'workflows_ID': reqDetail.currentWorkflowID });
-                    if (auditTrail.length == 0) result.canWithdraw = true
-
-                    if (reqDetail.RequestStatus_id == 'REJ' || reqDetail.RequestStatus_id == 'WTD') {
-                        result.canEdit = true;
+        this.before("READ", "RequestDetails", async (req) => {
+            try {
+                let reqDetail = await SELECT.one.from(RequestDetails).columns(r => {
+                    r`.*`,
+                        r.RequestStatus(cc => { cc`.*` })
+                }).where({ 'ID': req.data.ID });
+                let auditTrail = await SELECT.from(AuditTrail).where({ 'requestDetails_ID': req.data.ID, 'workflows_ID': reqDetail.currentWorkflowID });
+                for (const trail of auditTrail) {
+                    if (trail.taskType === 'Approved By' && trail.status === 'Approved') {
+                        await UPDATE.entity(RequestDetails).set(
+                            {
+                                "RequestStatus_id": "APR"
+                            }
+                        ).where({ 'ID': req.data.ID });
                     }
-                    if (reqDetail.RequestStatus_id === 'INP')
-                        for (const data of auditTrail) {
-                            if (req.user.id === data.approver && data.status != 'Void' && data.hasVoid) {
-                                result.canVoid = true;
+                }
+            } catch {
+                console.log(error)
+            }
+
+        })
+
+        this.after("READ", "RequestDetails", async (results, req) => {
+            try {
+                if (req?.data?.ID) {
+                    for (const result of results) {
+                        result.canEdit = false; //default values
+                        result.canVoid = false; //default values
+                        result.canWithdraw = false; //default values
+                        result.canRetire = false; //default values
+                        let reqDetail = await SELECT.one.from(RequestDetails).columns(r => {
+                            r`.*`,
+                                r.RequestStatus(cc => { cc`.*` })
+                        }).where({ 'ID': result.ID });
+                        let auditTrail = await SELECT.from(AuditTrail).where({ 'requestDetails_ID': result.ID, 'workflows_ID': reqDetail.currentWorkflowID });
+
+                        const approval = await cds.connect.to("spa-process-automation-tokenexchange")
+                        let workflows = await approval.send({
+                            method: 'GET', path: '/workflow/rest/v1/workflow-instances/' + reqDetail.currentWorkflowID
+                        })
+
+                        if (auditTrail.length == 0) result.canWithdraw = true
+
+                        if (reqDetail.RequestStatus_id === 'REJ' || reqDetail.RequestStatus_id === 'WTD') {
+                            result.canEdit = true;
+                        }
+                        if (reqDetail.RequestStatus_id === 'APR' && workflows.status === 'COMPLETED') {
+                            for (const data of auditTrail) {
+                                if (req.user.id === data.approver && data.status != 'Void' && data.hasVoid) {
+                                    result.canRetire = true;
+                                }
                             }
                         }
+                        if (reqDetail.RequestStatus_id === 'INP') {
+                            for (const data of auditTrail) {
+                                if (req.user.id === data.approver && data.status != 'Void' && data.hasVoid) {
+                                    result.canVoid = true;
+                                }
+                            }
+                        }
+                    }
                 }
+            } catch (error) {
+                console.log(error)
             }
+
         })
 
         // this.on('sideEffectDisposalAction', "AssetDetails.drafts", async (req) => {
@@ -249,6 +334,7 @@ module.exports = class AssetDisposal extends cds.ApplicationService {
                 console.error("Error:", error);
             }
         });
+
 
         this.before("NEW", "RequestDetails.drafts", async (req) => {
             console.log(req.data);
