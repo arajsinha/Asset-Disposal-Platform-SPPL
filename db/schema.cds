@@ -31,6 +31,7 @@ entity RequestDetails : cuid, managed {
     virtual canVoid   : Boolean;
     virtual canEdit   : Boolean;
     virtual canWithdraw   : Boolean;
+    virtual canRetire   : Boolean;
 }
 
 entity Workflows : cuid, managed {
@@ -88,6 +89,7 @@ entity DepartmentAssets {
     key department  : String(20)       @title: 'Department ID';
     key assetNumber : String(19) @title: 'Asset Number';
         costCenter  : String(12) @title: 'Cost Center';
+        assetDesc  : String(50) @title: 'Asset Description';
 }
 
 @cds.persistence.skip

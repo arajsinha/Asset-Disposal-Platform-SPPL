@@ -55,6 +55,16 @@ annotate service.RequestDetails with @(
                 {$Path: 'canVoid'},
                 true
             ]}}
+        },
+        {
+            $Type        : 'UI.DataFieldForAction',
+            Action       : 'AssetDisposal.retire',
+            Determining  : true,
+            Label        : 'Retire',
+            ![@UI.Hidden]: {$edmJson: {$Ne: [
+                {$Path: 'canRetire'},
+                true
+            ]}}
         }
     ],
     UI.SelectionPresentationVariant #table: {
@@ -445,6 +455,10 @@ annotate service.AssetDetails with {
                     $Type            : 'Common.ValueListParameterIn',
                     ValueListProperty: 'department',
                     LocalDataProperty: requestDetails.department_name,
+                },
+                {
+                    $Type            : 'Common.ValueListParameterDisplayOnly',
+                    ValueListProperty: 'assetDesc',
                 },
                 {
                     $Type            : 'Common.ValueListParameterDisplayOnly',

@@ -56,7 +56,7 @@ module.exports = class AssetDisposal extends cds.ApplicationService {
                         })
                     // .limit(req.query.SELECT.limit.offset.val, req.query.SELECT.limit.rows.val)
                 );
-                const finalAssetData = assetData.map((center) => { return { assetNumber: center.FixedAssetExternalID, costCenter: center.CostCenter } });
+                const finalAssetData = assetData.map((center) => { return { assetNumber: center.FixedAssetExternalID, costCenter: center.CostCenter, assetDesc: center.FixedAssetDescription } });
                 return finalAssetData;
             } else {
                 return [];
@@ -183,7 +183,7 @@ module.exports = class AssetDisposal extends cds.ApplicationService {
                     requestId: req.params[0].ID,
                     taskID: task.id,
                     taskName: task.subject,
-                    taskType: "Complete Workflow",
+                    taskType: "Withdraw",
                     taskTitle: task.subject,
                     comment: req.data.text,
                     status: "Withdrawn",
@@ -256,10 +256,17 @@ module.exports = class AssetDisposal extends cds.ApplicationService {
                         if (reqDetail.RequestStatus_id === 'REJ' || reqDetail.RequestStatus_id === 'WTD') {
                             result.canEdit = true;
                         }
-                        if (reqDetail.RequestStatus_id === 'APR' && workflows.status === 'COMPLETED') {
+                        if (workflows.status === 'COMPLETED') {
                             for (const data of auditTrail) {
                                 if (req.user.id === data.approver && data.status != 'Void' && data.hasVoid) {
                                     result.canRetire = true;
+                                }
+                            }
+                        }
+                        if (reqDetail.RequestStatus_id === 'APR' && workflows.status === 'COMPLETED') {
+                            for (const data of auditTrail) {
+                                if (req.user.id === data.approver && data.status != 'Void' && data.hasVoid) {
+                                    result.canRetire = false;
                                 }
                             }
                         }
