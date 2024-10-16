@@ -144,7 +144,7 @@ module.exports = class AssetDisposal extends cds.ApplicationService {
                 if (asset.disposalMethod == 'Write Off') {
                     retireData.BusinessTransactionType = "RA20"
                     retireData.FxdAstRetirementRevenueType = "1"
-                    retireData.AstRevenueAmountInTransCrcy = asset.scrapValue
+                    retireData.AstRevenueAmountInTransCrcy = Number(asset.scrapValue)
                     retireData.FxdAstRtrmtRevnTransCrcy = "SGD"
                     retireData.FxdAstRtrmtRevnCurrencyRole = "10"
                 } else {
@@ -158,12 +158,10 @@ module.exports = class AssetDisposal extends cds.ApplicationService {
                 let res = await retire.send({
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/xml' // Ensure content type is set correctly
+                        "Content-Type": "application/json",
                     },
                     path: `/FixedAssetRetirement/SAP__self.Post`,
-                    data: {
-                        retireData
-                    }
+                    data: retireData
                 })
                 console.log(res)
             }
@@ -208,27 +206,27 @@ module.exports = class AssetDisposal extends cds.ApplicationService {
             }
         });
 
-        this.before("READ", "RequestDetails", async (req) => {
-            try {
-                let reqDetail = await SELECT.one.from(RequestDetails).columns(r => {
-                    r`.*`,
-                        r.RequestStatus(cc => { cc`.*` })
-                }).where({ 'ID': req.data.ID });
-                let auditTrail = await SELECT.from(AuditTrail).where({ 'requestDetails_ID': req.data.ID, 'workflows_ID': reqDetail.currentWorkflowID });
-                for (const trail of auditTrail) {
-                    if (trail.taskType === 'Approved By' && trail.status === 'Approved') {
-                        await UPDATE.entity(RequestDetails).set(
-                            {
-                                "RequestStatus_id": "APR"
-                            }
-                        ).where({ 'ID': req.data.ID });
-                    }
-                }
-            } catch {
-                console.log(error)
-            }
+        // this.before("READ", "RequestDetails", async (req) => {
+        //     try {
+        //         let reqDetail = await SELECT.one.from(RequestDetails).columns(r => {
+        //             r`.*`,
+        //                 r.RequestStatus(cc => { cc`.*` })
+        //         }).where({ 'ID': req.data.ID });
+        //         let auditTrail = await SELECT.from(AuditTrail).where({ 'requestDetails_ID': req.data.ID, 'workflows_ID': reqDetail.currentWorkflowID });
+        //         for (const trail of auditTrail) {
+        //             if (trail.taskType === 'Approved By' && trail.status === 'Approved') {
+        //                 await UPDATE.entity(RequestDetails).set(
+        //                     {
+        //                         "RequestStatus_id": "APR"
+        //                     }
+        //                 ).where({ 'ID': req.data.ID });
+        //             }
+        //         }
+        //     } catch {
+        //         console.log(error)
+        //     }
 
-        })
+        // })
 
         this.after("READ", "RequestDetails", async (results, req) => {
             try {

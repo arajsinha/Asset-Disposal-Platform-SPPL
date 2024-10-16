@@ -30,9 +30,8 @@ Accept: application/json
 }
 
 ### Call Audit Trail Action
-POST http://localhost:4004/odata/v4/asset-disposal/RequestDetails(ID={{requestId}}, IsActiveEntity=true)/AssetDisposal.void
+POST http://localhost:4004/odata/v4/asset-disposal/RequestDetails(ID=2a0abd62-e2e2-451d-844d-69a9ef69802d, IsActiveEntity=true)/AssetDisposal.retire
 Content-Type: application/json
-Accept: application/json
 
 {
 
@@ -122,6 +121,25 @@ Authorization: Basic ARAJSINHA:jMWwWMzjYyAvuzWHfrvVDW+lnuGZTNYZawPFg9ux
    "AstRevenueAmountInTransCrcy": 1000.00,
    "FxdAstRtrmtRevnTransCrcy": "SGD",
    "FxdAstRtrmtRevnCurrencyRole": "10",
+   "FixedAssetRetirementType": "1"
+}
+
+//Without Revenue (Disposal)
+###
+POST https://my301971-api.s4hana.ondemand.com/sap/opu/odata4/sap/api_fixedassetretirement/srvd_a2x/sap/fixedassetretirement/0001/FixedAssetRetirement/SAP__self.Post
+Content-Type: application/json
+x-csrf-token: tbQQ9kS5ln-nCefXLN4V7g==
+Authorization: Basic ARAJSINHA:jMWwWMzjYyAvuzWHfrvVDW+lnuGZTNYZawPFg9ux
+
+{
+   "ReferenceDocumentItem": "1",
+   "CompanyCode": "2000",
+   "BusinessTransactionType": "RA21",
+   "MasterFixedAsset": "617202",
+   "FixedAsset": "0",
+   "DocumentDate": "2024-10-15",
+   "PostingDate": "2024-10-15",
+   "AssetValueDate": "2024-10-15",
    "FixedAssetRetirementType": "1"
 }
 

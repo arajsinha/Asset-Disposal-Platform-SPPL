@@ -40,13 +40,6 @@ service AssetDisposal {
         ]}
       )
       action void(text : inVoid:comment);
-      @(
-        cds.odata.bindingparameter.name: 'in',
-        Common.SideEffects             : {TargetProperties: [
-          'in/RequestStatus_id',
-          'in/canRetire'
-        ]}
-      )
       action retire();
     }
 

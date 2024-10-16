@@ -31,7 +31,6 @@ entity RequestDetails : cuid, managed {
     virtual canVoid   : Boolean;
     virtual canEdit   : Boolean;
     virtual canWithdraw   : Boolean;
-    virtual canRetire   : Boolean;
 }
 
 entity Workflows : cuid, managed {
