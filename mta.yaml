@@ -139,6 +139,8 @@ resources:
             destinations:
               - Authentication: NoAuthentication
                 HTML5.DynamicDestination: true
+                sap.applicationdevelopment.actions.enabled: true
+                sap.build.usage: CAP
                 HTML5.ForwardAuthToken: true
                 WebIDEEnabled: true
                 Name: asset-disposal-singaporepools-srv-api
