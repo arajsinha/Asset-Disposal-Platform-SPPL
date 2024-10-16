@@ -14,7 +14,10 @@ service DepartmentMaintenance {
 
 service AssetDisposal {
 
-  type inText : {
+  type inVoid : {
+    comment : String;
+  };
+  type inWithdraw : {
     comment : String;
   };
 
@@ -27,7 +30,7 @@ service AssetDisposal {
         cds.odata.bindingparameter.name: 'in',
         Common.SideEffects             : {TargetProperties: ['in/RequestStatus_id', 'in/canWithdraw']}
       )
-      action withdraw(text : inText:comment);
+      action withdraw(text : inWithdraw:comment);
 
       @(
         cds.odata.bindingparameter.name: 'in',
@@ -36,7 +39,7 @@ service AssetDisposal {
           'in/canVoid'
         ]}
       )
-      action void(text : inText:comment);
+      action void(text : inVoid:comment);
     }
 
   // @odata.draft.enabled

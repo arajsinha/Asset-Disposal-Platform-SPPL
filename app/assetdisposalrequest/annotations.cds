@@ -4,7 +4,8 @@ annotate service.RequestDetails actions {
     void @Common.IsActionCritical;
 }
 
-annotate service.inText : comment with @Common.Label: 'Comment Reason For Voiding';
+annotate service.inVoid : comment with @Common.Label: 'Comment Reason For Voiding';
+annotate service.inWithdraw : comment with @Common.Label: 'Comment Reason For Withdrawing';
 
 annotate service.RequestDetails with @(
     UI.DeleteHidden                       : true,
