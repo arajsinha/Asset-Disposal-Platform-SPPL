@@ -165,6 +165,10 @@ module.exports = class AssetDisposal extends cds.ApplicationService {
                 })
                 console.log(res)
             }
+            await UPDATE.entity(RequestDetails).set(
+                {
+                    "RequestStatus_id": "APR"
+                }).where({ 'ID': req.params[0].ID });
         })
 
         this.on('withdraw', "RequestDetails", async (req) => {
