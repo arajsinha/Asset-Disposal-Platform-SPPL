@@ -13,7 +13,7 @@ module.exports = class AssetDisposal extends cds.ApplicationService {
 
         const fixa = await cds.connect.to('YY1_FIXED_ASSET');
         const retire = await cds.connect.to('ASSET_RETIRE');
-        // const taskUI = await cds.connect.to('AssetDisposalTaskUI');
+        const taskUI = await cds.connect.to('AssetDisposalTaskUI');
 
         this.on('READ', 'YY1_FIXED_ASSETS_CC', async req => {
             let ans = await fixa.run(req.query);
