@@ -70,7 +70,6 @@ module.exports = class AssetDisposal extends cds.ApplicationService {
                 let tasks = await approval.send({
                     method: 'GET', path: `/workflow/rest/v1/task-instances?workflowInstanceId=${workflows.currentWorkflowID}`
                 });
-                // tasks.forEach(async (task) => {
                 for (const task of tasks) {
                     if (task.status !== 'COMPLETED') {
                         await approval.send({
@@ -82,19 +81,6 @@ module.exports = class AssetDisposal extends cds.ApplicationService {
                                 "approver": req.user.id
                             }
                         });
-
-                        // await INSERT.into(AuditTrail).entries({
-                        //     requestId: req.params[0].ID,
-                        //     taskID: task.id,
-                        //     taskDescription: task.subject,
-                        //     taskType: "NICE",
-                        //     subject: task.subject,
-                        //     comment: req.data.text,
-                        //     status: "Void",
-                        //     workflowID: workflows.currentWorkflowID,
-                        //     hasVoid: false
-                        // })
-
                         await taskUI.send('addAuditTrial', "AssetDisposalTaskUI.RequestDetails", {
                             requestId: req.params[0].ID,
                             taskID: task.id,
@@ -106,16 +92,6 @@ module.exports = class AssetDisposal extends cds.ApplicationService {
                             workflowId: workflows.currentWorkflowID,
                             hasVoid: false
                         });
-                        // await taskUI.send('addAuditTrial', {
-                        //     taskID: task.id,
-                        //     taskName: "TaskName",
-                        //     taskType: "Task Type",
-                        //     taskTitle: "Task Title",
-                        //     workflowId: workflows.currentWorkflowID,
-                        //     comment: req.data.text,
-                        //     status: "Void",
-                        //     hasVoid: false
-                        // });
                     }
                 }
 
@@ -134,6 +110,8 @@ module.exports = class AssetDisposal extends cds.ApplicationService {
                     r.assetDetails(cc => { cc`.*` })
             }).where({ 'ID': req.params[0].ID });
             const today = new Date();
+            const lastDayOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+            const formattedLastDate = lastDayOfMonth.toISOString().split('T')[0];
             const formattedDate = today.toISOString().split('T')[0];
             let retireData = {
                 ReferenceDocumentItem: "1",
@@ -141,7 +119,7 @@ module.exports = class AssetDisposal extends cds.ApplicationService {
                 FixedAssetRetirementType: "1"
             }
             for (const asset of assetDetails.assetDetails) {
-                if (asset.disposalMethod == 'Write Off') {
+                if (asset.disposalMethod == 'Disposal') {
                     retireData.BusinessTransactionType = "RA20"
                     retireData.FxdAstRetirementRevenueType = "1"
                     retireData.AstRevenueAmountInTransCrcy = Number(asset.scrapValue)
@@ -154,7 +132,7 @@ module.exports = class AssetDisposal extends cds.ApplicationService {
                 retireData.FixedAsset = asset.assetNumber.split("-")[1]
                 retireData.DocumentDate = formattedDate
                 retireData.PostingDate = formattedDate
-                retireData.AssetValueDate = formattedDate
+                retireData.AssetValueDate = formattedLastDate
                 let res = await retire.send({
                     method: 'POST',
                     headers: {
@@ -177,7 +155,6 @@ module.exports = class AssetDisposal extends cds.ApplicationService {
             let tasks = await approval.send({
                 method: 'GET', path: `/workflow/rest/v1/task-instances?workflowInstanceId=${workflows.currentWorkflowID}`
             });
-            // tasks.forEach(async (task) => {
             for (const task of tasks) {
                 await taskUI.send('addAuditTrial', "AssetDisposalTaskUI.RequestDetails", {
                     requestId: req.params[0].ID,
@@ -210,28 +187,6 @@ module.exports = class AssetDisposal extends cds.ApplicationService {
             }
         });
 
-        // this.before("READ", "RequestDetails", async (req) => {
-        //     try {
-        //         let reqDetail = await SELECT.one.from(RequestDetails).columns(r => {
-        //             r`.*`,
-        //                 r.RequestStatus(cc => { cc`.*` })
-        //         }).where({ 'ID': req.data.ID });
-        //         let auditTrail = await SELECT.from(AuditTrail).where({ 'requestDetails_ID': req.data.ID, 'workflows_ID': reqDetail.currentWorkflowID });
-        //         for (const trail of auditTrail) {
-        //             if (trail.taskType === 'Approved By' && trail.status === 'Approved') {
-        //                 await UPDATE.entity(RequestDetails).set(
-        //                     {
-        //                         "RequestStatus_id": "APR"
-        //                     }
-        //                 ).where({ 'ID': req.data.ID });
-        //             }
-        //         }
-        //     } catch {
-        //         console.log(error)
-        //     }
-
-        // })
-
         this.after("READ", "RequestDetails", async (results, req) => {
             try {
                 if (req?.data?.ID) {
@@ -251,7 +206,7 @@ module.exports = class AssetDisposal extends cds.ApplicationService {
                             method: 'GET', path: '/workflow/rest/v1/workflow-instances/' + reqDetail.currentWorkflowID
                         })
 
-                        if (auditTrail.length == 0) result.canWithdraw = true
+                        if (auditTrail.length == 1) result.canWithdraw = true
 
                         if (reqDetail.RequestStatus_id === 'REJ' || reqDetail.RequestStatus_id === 'WTD') {
                             result.canEdit = true;
@@ -409,6 +364,22 @@ module.exports = class AssetDisposal extends cds.ApplicationService {
                         "currentWorkflowID": res.id,
                         "RequestStatus_id": "INP"
                     }).where({ 'ID': req.ID });
+                let data = await SELECT.from(RequestDetails)
+                    .columns(r => {
+                        r`.*`
+                    })
+                    .where({ ID: req.ID });
+                await taskUI.send('addAuditTrial', "AssetDisposalTaskUI.RequestDetails", {
+                    requestId: req.ID,
+                    taskID: "creationtask",
+                    taskName: "Asset Disposal Request Created",
+                    taskType: "Created By",
+                    taskTitle: "Asset Disposal Request Created",
+                    comment: "Asset Disposal Request Created",
+                    status: "Gone for Processing",
+                    workflowId: data[0].currentWorkflowID,
+                    hasVoid: false
+                });
 
                 await INSERT.into(Workflows).entries({
                     workflowID: res.id,  // The new workflowID to be added
