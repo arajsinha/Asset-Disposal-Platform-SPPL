@@ -17,7 +17,7 @@ service AssetDisposalTaskUI {
     actions {
       action void();
       action addAuditTrial(requestId : RequestDetails:ID @mandatory,
-                           taskID : auditTrailType:taskID @mandatory,
+                           taskID : auditTrailType:taskID,
                            taskName : auditTrailType:taskName @mandatory,
                            taskType : auditTrailType:taskType @mandatory,
                            taskTitle : auditTrailType:taskID @mandatory,

@@ -163,7 +163,7 @@ Authorization: Basic ARAJSINHA:jMWwWMzjYyAvuzWHfrvVDW+lnuGZTNYZawPFg9ux
 }
 
 ###
-GET https://my301971-api.s4hana.ondemand.com/sap/opu/odata4/sap/api_fixedassetretirement/srvd_a2x/sap/fixedassetretirement/0001/FixedAssetRetirement/017fd645-7c43-1eef-a2f3-d8fd10e55cc8/1
+GET https://my301971-api.s4hana.ondemand.com/sap/opu/odata4/sap/api_fixedassetretirement/srvd_a2x/sap/fixedassetretirement/0001/FixedAssetRetirement/017fd645-7c43-1eef-a2f3-d8fd10e55cc8/1$expand=Ledger
 Content-Type: application/json
 Authorization: Basic ARAJSINHA:jMWwWMzjYyAvuzWHfrvVDW+lnuGZTNYZawPFg9ux
 

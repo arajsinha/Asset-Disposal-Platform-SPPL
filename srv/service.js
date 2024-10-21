@@ -371,9 +371,9 @@ module.exports = class AssetDisposal extends cds.ApplicationService {
                     .where({ ID: req.ID });
                 await taskUI.send('addAuditTrial', "AssetDisposalTaskUI.RequestDetails", {
                     requestId: req.ID,
-                    taskID: "creationtask",
+                    taskID: "workflowcreationtask",
                     taskName: "Asset Disposal Request Created",
-                    taskType: "Created By",
+                    taskType: "Asset Disposal Workflow Created By",
                     taskTitle: "Asset Disposal Request Created",
                     comment: "Asset Disposal Request Created",
                     status: "Gone for Processing",
