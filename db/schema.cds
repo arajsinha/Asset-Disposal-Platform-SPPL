@@ -13,24 +13,25 @@ using {deptassets} from './department_maintenance';
 entity YY1_FIXED_ASSETS_CC as projection on fixedasset.YY1_FIXED_ASSETS_CC;
 
 entity RequestDetails : cuid, managed {
-    date              : Date                                      @title: 'Date';
-    requestorName     : String(100)                               @title: 'Requestor Name';
-    department        : Association to one deptassets.Departments on department.name = department_name;
-    department_name     : String(20)  @title: 'Department';
-    totalPurchaseCost : String(100)                               @title: 'Total Purchase Cost';
-    currentWorkflowID : String(36);
-    assetDetails      : Composition of many AssetDetails
-                            on assetDetails.requestDetails = $self;
-    objectId          : String(14)                                @title: 'Request ID';
-    RequestStatus     : Association to one RequestStatus          @title: 'Request Status';
-    AuditTrail        : Association to many AuditTrail
-                            on AuditTrail.requestDetails = $self;
-    workflows         : Composition of many Workflows
-                            on workflows.requestDetails = $self; // One RequestDetails can have many Workflows
-    attachments       : Composition of many Attachments;
-    virtual canVoid   : Boolean;
-    virtual canEdit   : Boolean;
-    virtual canWithdraw   : Boolean;
+    date                : Date                             @title: 'Date';
+    requestorName       : String(100)                      @title: 'Requestor Name';
+    department          : Association to one deptassets.Departments
+                              on department.name = department_name;
+    department_name     : String(20)                       @title: 'Department';
+    totalPurchaseCost   : String(100)                      @title: 'Total Purchase Cost';
+    currentWorkflowID   : String(36);
+    assetDetails        : Composition of many AssetDetails
+                              on assetDetails.requestDetails = $self;
+    objectId            : String(14)                       @title: 'Request ID';
+    RequestStatus       : Association to one RequestStatus @title: 'Request Status';
+    AuditTrail          : Association to many AuditTrail
+                              on AuditTrail.requestDetails = $self;
+    workflows           : Composition of many Workflows
+                              on workflows.requestDetails = $self; // One RequestDetails can have many Workflows
+    attachments         : Composition of many Attachments;
+    virtual canVoid     : Boolean;
+    virtual canEdit     : Boolean;
+    virtual canWithdraw : Boolean;
     virtual canRetire   : Boolean;
 }
 
@@ -51,21 +52,22 @@ entity DisposalMethod {
 }
 
 entity AssetDetails : cuid, managed {
-    assetNumber       : String(19)     @title: 'Asset Number';
-    subNumber         : String(6)      @title: 'Sub No.';
-    costCenter        : String(12)     @title: 'Cost Center';
-    assetClass        : String(10)     @title: 'Asset Class';
-    assetDesc         : String(50)     @title: 'Asset Description';
-    assetPurchaseDate : Date           @title: 'Purchase Date';
-    assetPurchaseCost : Decimal(24, 3) @title: 'Purchase Cost';
-    netBookValue      : Decimal(24, 3) @title: 'Net Book Value';
-    companyCode       : String(6)      @title: 'Company Code';
-    reasonWriteOff    : String(100)    @title: 'Reason For Write Off';
-    disposalMethod    : String(100)    @title: 'Proposed Method of Disposal';
-    scrapValue        : Decimal(24, 3) @title: 'Salvage Value';
-    requestDetails    : Association to one RequestDetails;
-    Currency          : String(5)      @title: 'Currency';
-    virtual salvageMandatory: String(1);
+    assetNumber              : String(19)     @title: 'Asset Number';
+    subNumber                : String(6)      @title: 'Sub No.';
+    costCenter               : String(12)     @title: 'Cost Center';
+    assetClass               : String(10)     @title: 'Asset Class';
+    assetDesc                : String(50)     @title: 'Asset Description';
+    assetPurchaseDate        : Date           @title: 'Purchase Date';
+    assetPurchaseCost        : Decimal(24, 3) @title: 'Purchase Cost';
+    netBookValue             : Decimal(24, 3) @title: 'Net Book Value';
+    companyCode              : String(6)      @title: 'Company Code';
+    reasonWriteOff           : String(100)    @title: 'Reason For Write Off';
+    disposalMethod           : String(100)    @title: 'Proposed Method of Disposal';
+    scrapValue               : Decimal(24, 3) @title: 'Salvage Value';
+    requestDetails           : Association to one RequestDetails;
+    Currency                 : String(5)      @title: 'Currency';
+    isRetired                : Boolean;
+    virtual salvageMandatory : String(1);
 }
 
 entity AuditTrail : cuid, managed {
@@ -86,10 +88,10 @@ entity AuditTrail : cuid, managed {
 // Department Assets
 @cds.persistence.skip
 entity DepartmentAssets {
-    key department  : String(20)       @title: 'Department ID';
+    key department  : String(20) @title: 'Department ID';
     key assetNumber : String(19) @title: 'Asset Number';
         costCenter  : String(12) @title: 'Cost Center';
-        assetDesc  : String(50) @title: 'Asset Description';
+        assetDesc   : String(50) @title: 'Asset Description';
 }
 
 @cds.persistence.skip

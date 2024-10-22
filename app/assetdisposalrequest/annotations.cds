@@ -56,16 +56,12 @@ annotate service.RequestDetails with @(
                 true
             ]}}
         },
-        {
-            $Type        : 'UI.DataFieldForAction',
-            Action       : 'AssetDisposal.retire',
-            Determining  : true,
-            Label        : 'Retire',
-            ![@UI.Hidden]: {$edmJson: {$Ne: [
-                {$Path: 'canRetire'},
-                true
-            ]}}
-        }
+        // {
+        //     $Type        : 'UI.DataFieldForAction',
+        //     Action       : 'AssetDisposal.retire',
+        //     Determining  : true,
+        //     Label        : 'Retire'
+        // }
     ],
     UI.SelectionPresentationVariant #table: {
         $Type              : 'UI.SelectionPresentationVariantType',

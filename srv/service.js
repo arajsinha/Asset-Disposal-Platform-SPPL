@@ -107,46 +107,70 @@ module.exports = class AssetDisposal extends cds.ApplicationService {
         this.on('retire', "RequestDetails", async (req) => {
             let assetDetails = await SELECT.one.from(RequestDetails).columns(r => {
                 r`.*`,
-                    r.assetDetails(cc => { cc`.*` })
+                    r.assetDetails(cc => { cc`.*` }),
+                    r.AuditTrail(cc => { cc`.*` })
             }).where({ 'ID': req.params[0].ID });
-            const today = new Date();
-            const lastDayOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0);
-            const formattedLastDate = lastDayOfMonth.toISOString().split('T')[0];
-            const formattedDate = today.toISOString().split('T')[0];
+            let witnessedByDate
+            for (const auditDetails of assetDetails.AuditTrail) {
+                if (auditDetails.taskType == 'Witnessed By' && auditDetails.status == 'Approved') {
+                    witnessedByDate = auditDetails.timestamp
+                }
+                if (auditDetails.taskType == 'Process' && auditDetails.status == 'Rejected') {
+                    witnessedByDate = new Date()
+                }
+            }
+            const postingDay = new Date(witnessedByDate);
+            const formattedDate = postingDay.toISOString().split('T')[0];
+            // const postingDay = new Date();
+            // const formattedDate = postingDay.toISOString().split('T')[0];
             let retireData = {
                 ReferenceDocumentItem: "1",
                 CompanyCode: "2000",
                 FixedAssetRetirementType: "1"
             }
             for (const asset of assetDetails.assetDetails) {
-                if (asset.disposalMethod == 'Disposal') {
-                    retireData.BusinessTransactionType = "RA20"
-                    retireData.FxdAstRetirementRevenueType = "1"
-                    retireData.AstRevenueAmountInTransCrcy = Number(asset.scrapValue)
-                    retireData.FxdAstRtrmtRevnTransCrcy = "SGD"
-                    retireData.FxdAstRtrmtRevnCurrencyRole = "10"
-                } else {
-                    retireData.BusinessTransactionType = "RA21"
+                if (asset.isRetired == false) {
+                    if (asset.disposalMethod == 'Disposal') {
+                        retireData.BusinessTransactionType = "RA20"
+                        retireData.FxdAstRetirementRevenueType = "1"
+                        retireData.AstRevenueAmountInTransCrcy = Number(asset.scrapValue)
+                        retireData.FxdAstRtrmtRevnTransCrcy = "SGD"
+                        retireData.FxdAstRtrmtRevnCurrencyRole = "10"
+                    } else {
+                        retireData.BusinessTransactionType = "RA21"
+                    }
+                    retireData.MasterFixedAsset = asset.assetNumber.split("-")[0]
+                    retireData.FixedAsset = asset.assetNumber.split("-")[1]
+                    retireData.DocumentDate = formattedDate
+                    retireData.PostingDate = formattedDate
+                    retireData.AssetValueDate = formattedDate
+                    try {
+                        let res = await retire.send({
+                            method: 'POST',
+                            headers: {
+                                "Content-Type": "application/json",
+                            },
+                            path: `/FixedAssetRetirement/SAP__self.Post`,
+                            data: retireData
+                        })
+                        console.log(res)
+                        await UPDATE.entity(AssetDetails).set(
+                            {
+                                "isRetired": true
+                            }).where({ 'ID': assetDetails.assetDetails[0].ID });
+                    } catch (error) {
+                        console.log(error)
+                        await UPDATE.entity(AssetDetails).set(
+                            {
+                                "isRetired": false
+                            }).where({ 'ID': assetDetails.assetDetails[0].ID });
+                        await UPDATE.entity(RequestDetails).set(
+                            {
+                                "RequestStatus_id": "APR"
+                            }).where({ 'ID': req.params[0].ID });
+                    }
                 }
-                retireData.MasterFixedAsset = asset.assetNumber.split("-")[0]
-                retireData.FixedAsset = asset.assetNumber.split("-")[1]
-                retireData.DocumentDate = formattedDate
-                retireData.PostingDate = formattedDate
-                retireData.AssetValueDate = formattedLastDate
-                let res = await retire.send({
-                    method: 'POST',
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    path: `/FixedAssetRetirement/SAP__self.Post`,
-                    data: retireData
-                })
-                console.log(res)
             }
-            await UPDATE.entity(RequestDetails).set(
-                {
-                    "RequestStatus_id": "APR"
-                }).where({ 'ID': req.params[0].ID });
         })
 
         this.on('withdraw', "RequestDetails", async (req) => {
