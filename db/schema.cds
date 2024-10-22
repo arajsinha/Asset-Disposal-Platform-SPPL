@@ -13,7 +13,7 @@ using {deptassets} from './department_maintenance';
 entity YY1_FIXED_ASSETS_CC as projection on fixedasset.YY1_FIXED_ASSETS_CC;
 
 entity RequestDetails : cuid, managed {
-    date                : Date                             @title: 'Date';
+    date                : Date                             @title: 'Submission Date';
     requestorName       : String(100)                      @title: 'Requestor Name';
     department          : Association to one deptassets.Departments
                               on department.name = department_name;

@@ -409,6 +409,15 @@ module.exports = class AssetDisposal extends cds.ApplicationService {
                     workflowID: res.id,  // The new workflowID to be added
                     requestDetails_ID: req.ID  // Link it to the corresponding RequestDetails
                 });
+                // let reqDetail = await SELECT.one.from(RequestDetails).columns(r => {
+                //     r`.*`
+                // }).where({ 'ID': result.ID });
+                let auditTrail = await SELECT.from(AuditTrail).where({'requestDetails_ID': req.ID });
+                console.log('nice')
+                await UPDATE.entity(RequestDetails).set(
+                    {
+                        'date': auditTrail[auditTrail.length-1].timestamp
+                    }).where({ 'ID': req.ID });
             } catch (error) {
                 console.log(error)
             }
