@@ -207,8 +207,7 @@ annotate service.AssetDetails with @(UI.LineItem #Assets: [
     {
         $Type               : 'UI.DataField',
         Value               : scrapValue,
-        // ![@Common.FieldControl] : { $edmJson : {$If : [ { $Eq : [ { $Path : 'salvageMandatory'},  ]}, 7, 3 ]}},
-        // @Common.FieldControl : salvageMandatory
+        @Common.FieldControl : salvageMandatory,
     },
     {
         $Type: 'UI.DataField',

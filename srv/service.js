@@ -269,14 +269,19 @@ module.exports = class AssetDisposal extends cds.ApplicationService {
         //     console.log(ans.disposalMethod)
         // })
 
-        // this.after("READ", "AssetDetails.drafts", async (results, req) => {
-        //     for (const result of results) {
-        //         result.salvageMandatory = '3'; //default values
-        //         if (result.disposalMethod == 'Disposal') {
-        //             result.salvageMandatory = '7'
-        //         }
-        //     }
-        // });
+        this.after("READ", "AssetDetails.drafts", async (results, req) => {
+            for (const result of results) {
+                result.salvageMandatory = 7; //default values
+                
+                if(result.disposalMethod === undefined || result.disposalMethod === 'Write Off') {
+                    let data = await SELECT.from(AssetDetails.drafts).where({'ID': result.ID})
+                    if (data[0].disposalMethod === 'Write Off') {
+                        result.scrapValue = '';
+                        result.salvageMandatory = 1;
+                    }
+                }
+            }
+        });
 
         this.on('sideEffectTriggerAction', "AssetDetails.drafts", async (req) => {
             let ans = await SELECT.one.from(AssetDetails.drafts).where({ 'ID': req.params[1].ID })
@@ -409,14 +414,10 @@ module.exports = class AssetDisposal extends cds.ApplicationService {
                     workflowID: res.id,  // The new workflowID to be added
                     requestDetails_ID: req.ID  // Link it to the corresponding RequestDetails
                 });
-                // let reqDetail = await SELECT.one.from(RequestDetails).columns(r => {
-                //     r`.*`
-                // }).where({ 'ID': result.ID });
                 let auditTrail = await SELECT.from(AuditTrail).where({'requestDetails_ID': req.ID });
-                console.log('nice')
                 await UPDATE.entity(RequestDetails).set(
                     {
-                        'date': auditTrail[auditTrail.length-1].timestamp
+                        'date': auditTrail[0].timestamp
                     }).where({ 'ID': req.ID });
             } catch (error) {
                 console.log(error)

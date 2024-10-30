@@ -52,22 +52,22 @@ entity DisposalMethod {
 }
 
 entity AssetDetails : cuid, managed {
-    assetNumber              : String(19)     @title: 'Asset Number';
-    subNumber                : String(6)      @title: 'Sub No.';
-    costCenter               : String(12)     @title: 'Cost Center';
-    assetClass               : String(10)     @title: 'Asset Class';
-    assetDesc                : String(50)     @title: 'Asset Description';
-    assetPurchaseDate        : Date           @title: 'Purchase Date';
-    assetPurchaseCost        : Decimal(24, 3) @title: 'Purchase Cost';
-    netBookValue             : Decimal(24, 3) @title: 'Net Book Value';
-    companyCode              : String(6)      @title: 'Company Code';
-    reasonWriteOff           : String(100)    @title: 'Reason For Write Off';
-    disposalMethod           : String(100)    @title: 'Proposed Method of Disposal';
-    scrapValue               : Decimal(24, 3) @title: 'Salvage Value';
-    requestDetails           : Association to one RequestDetails;
-    Currency                 : String(5)      @title: 'Currency';
-    isRetired                : Boolean;
-    virtual salvageMandatory : String(1);
+    assetNumber       : String(19)     @title     : 'Asset Number';
+    subNumber         : String(6)      @title     : 'Sub No.';
+    costCenter        : String(12)     @title     : 'Cost Center';
+    assetClass        : String(10)     @title     : 'Asset Class';
+    assetDesc         : String(50)     @title     : 'Asset Description';
+    assetPurchaseDate : Date           @title     : 'Purchase Date';
+    assetPurchaseCost : Decimal(24, 2) @title     : 'Purchase Cost';
+    netBookValue      : Decimal(24, 2) @title     : 'Net Book Value';
+    companyCode       : String(6)      @title     : 'Company Code';
+    reasonWriteOff    : String(100)    @title     : 'Reason For Write Off';
+    disposalMethod    : String(100)    @title     : 'Proposed Method of Disposal';
+    scrapValue        : Decimal(24, 2) @title     : 'Salvage Value';
+    requestDetails    : Association to one RequestDetails;
+    Currency          : String(5)      @title     : 'Currency';
+    isRetired         : Boolean;
+    salvageMandatory  : Integer        @odata.Type: 'Edm.Byte'; // 1: #ReadOnly, 7: #Mandatory
 }
 
 entity AuditTrail : cuid, managed {
