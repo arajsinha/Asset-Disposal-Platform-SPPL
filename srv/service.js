@@ -317,10 +317,12 @@ module.exports = class AssetDisposal extends cds.ApplicationService {
 
         this.before("CREATE", "RequestDetails", async (req) => {
             try {
+                
                 let count = await SELECT.one.from(RequestDetails).columns('count(ID) as val');
                 console.log(count);
                 const counter = count.val + 1
                 req.data.objectId = counter.toString();
+                
                 req.data.RequestStatus_id = "INP";
             }
             catch (error) {
@@ -332,7 +334,7 @@ module.exports = class AssetDisposal extends cds.ApplicationService {
         this.before("NEW", "RequestDetails.drafts", async (req) => {
             console.log(req.data);
             req.data.assetDetails ??= {};
-            req.data.objectId = '0000' + '$';
+            //req.data.objectId = '0000' + '$';
             req.data.RequestStatus_id = "NEW";
             req.data.date = new Date().toISOString().split('T')[0];
             req.data.requestorName = (req.user.attr.givenName) + " " + (req.user.attr.familyName);
