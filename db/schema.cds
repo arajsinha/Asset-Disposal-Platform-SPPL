@@ -22,7 +22,7 @@ entity RequestDetails : cuid, managed {
     currentWorkflowID   : String(36);
     assetDetails        : Composition of many AssetDetails
                               on assetDetails.requestDetails = $self;
-    objectId            : Integer  @title: 'Request ID';
+    objectId            : String(24) @title: 'Request ID';
     RequestStatus       : Association to one RequestStatus @title: 'Request Status';
     AuditTrail          : Association to many AuditTrail
                               on AuditTrail.requestDetails = $self;
