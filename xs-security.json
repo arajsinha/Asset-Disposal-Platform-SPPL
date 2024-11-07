@@ -18,6 +18,10 @@
       "name": "$XSAPPNAME.user",
       "description": "UAA",
       "granted-apps" : [ "$XSAPPNAME(application,assetdisposaltask)"]
+    },
+    {
+      "name": "$XSAPPNAME.Asset_Request_Write",
+      "description": "Scope to write asset disposal request"
     }
   ],
   "role-templates": [
@@ -26,6 +30,22 @@
       "description": "UAA",
       "scope-references": [
         "$XSAPPNAME.user"
+      ]
+    },
+    {
+      "name": "AssetDisposalRequest",
+      "description": "Write asset disposal request",
+      "scope-references": [
+        "$XSAPPNAME.Asset_Request_Write"
+      ]
+    }
+  ],
+  "role-collections": [
+    {
+      "name": "SP_REQUESTOR",
+      "description": "Role Collection to do write opertaions on disposal request",
+      "role-template-references": [
+        "$XSAPPNAME.AssetDisposalRequest"
       ]
     }
   ],
