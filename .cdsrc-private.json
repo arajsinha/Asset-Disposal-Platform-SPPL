@@ -4,7 +4,7 @@
       "db": {
         "binding": {
           "type": "cf",
-          "apiEndpoint": "https://api.cf.eu10-004.hana.ondemand.com",
+          "apiEndpoint": "https://api.cf.ap11.hana.ondemand.com",
           "org": "Technical Field Enablement_sap-process-automation-tfe",
           "space": "DEV",
           "instance": "asset-disposal-singaporepools-db",
@@ -19,7 +19,7 @@
       "destinations": {
         "binding": {
           "type": "cf",
-          "apiEndpoint": "https://api.cf.eu10-004.hana.ondemand.com",
+          "apiEndpoint": "https://api.cf.ap11.hana.ondemand.com",
           "org": "Technical Field Enablement_sap-process-automation-tfe",
           "space": "DEV",
           "instance": "sp-destination",
@@ -34,7 +34,7 @@
       "custom-service:sdm-di-instance": {
         "binding": {
           "type": "cf",
-          "apiEndpoint": "https://api.cf.eu10-004.hana.ondemand.com",
+          "apiEndpoint": "https://api.cf.ap11.hana.ondemand.com",
           "org": "Technical Field Enablement_sap-process-automation-tfe",
           "space": "DEV",
           "instance": "sdm-di-instance",
@@ -48,7 +48,7 @@
       "auth": {
         "binding": {
           "type": "cf",
-          "apiEndpoint": "https://api.cf.eu10-004.hana.ondemand.com",
+          "apiEndpoint": "https://api.cf.ap11.hana.ondemand.com",
           "org": "Technical Field Enablement_sap-process-automation-tfe",
           "space": "DEV",
           "instance": "asset-disposal-auth",
@@ -63,7 +63,7 @@
       "objectstore": {
         "binding": {
           "type": "cf",
-          "apiEndpoint": "https://api.cf.eu10-004.hana.ondemand.com",
+          "apiEndpoint": "https://api.cf.ap11.hana.ondemand.com",
           "org": "Technical Field Enablement_sap-process-automation-tfe",
           "space": "DEV",
           "instance": "object-store-aws",
@@ -78,7 +78,7 @@
       "malware-scanner": {
         "binding": {
           "type": "cf",
-          "apiEndpoint": "https://api.cf.eu10-004.hana.ondemand.com",
+          "apiEndpoint": "https://api.cf.ap11.hana.ondemand.com",
           "org": "Technical Field Enablement_sap-process-automation-tfe",
           "space": "DEV",
           "instance": "malware-scan",
