@@ -96,4 +96,8 @@ service AssetDisposal {
 
   @readonly
   entity DepartmentAssets    as projection on spassets.DepartmentAssets;
+
+  annotate RequestDetails with @(restrict: [
+  { grant: 'WRITE', to: 'Asset_Request_Write' },
+  { grant: 'READ', to: 'authenticated-user' } ]);
 }

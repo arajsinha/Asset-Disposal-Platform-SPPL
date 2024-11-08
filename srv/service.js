@@ -1,5 +1,6 @@
 const cds = require('@sap/cds');
 const { error } = require('@sap/cds/lib');
+const SequenceHelper = require("./lib/SequenceHelper");
 
 module.exports = class AssetDisposal extends cds.ApplicationService {
 
@@ -14,6 +15,7 @@ module.exports = class AssetDisposal extends cds.ApplicationService {
         const fixa = await cds.connect.to('YY1_FIXED_ASSET');
         const retire = await cds.connect.to('ASSET_RETIRE');
         const taskUI = await cds.connect.to('AssetDisposalTaskUI');
+        const db = await cds.connect.to('db');
 
         this.on('READ', 'YY1_FIXED_ASSETS_CC', async req => {
             let ans = await fixa.run(req.query);
@@ -317,10 +319,17 @@ module.exports = class AssetDisposal extends cds.ApplicationService {
 
         this.before("CREATE", "RequestDetails", async (req) => {
             try {
-                let count = await SELECT.one.from(RequestDetails).columns('count(ID) as val');
-                console.log(count);
-                const counter = count.val + 1
-                req.data.objectId = counter.toString();
+
+                const objectIdSeqNo = new SequenceHelper({
+                    db: db,
+                    sequence: "OBJECTID",
+                    table: "spassets.RequestDetails",
+                    field: "OBJECTID"
+                });
+        
+                let objectId = await objectIdSeqNo.getNextNumber();
+                req.data.objectId = "RETOPS-" + objectId;
+                
                 req.data.RequestStatus_id = "INP";
             }
             catch (error) {
@@ -332,7 +341,7 @@ module.exports = class AssetDisposal extends cds.ApplicationService {
         this.before("NEW", "RequestDetails.drafts", async (req) => {
             console.log(req.data);
             req.data.assetDetails ??= {};
-            req.data.objectId = '0000' + '$';
+            req.data.objectId = 'RETOPS-' + '$';
             req.data.RequestStatus_id = "NEW";
             req.data.date = new Date().toISOString().split('T')[0];
             req.data.requestorName = (req.user.attr.givenName) + " " + (req.user.attr.familyName);
