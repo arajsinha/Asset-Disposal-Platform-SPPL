@@ -167,6 +167,15 @@ GET https://my301971-api.s4hana.ondemand.com/sap/opu/odata4/sap/api_fixedassetre
 Content-Type: application/json
 Authorization: Basic ARAJSINHA:jMWwWMzjYyAvuzWHfrvVDW+lnuGZTNYZawPFg9ux
 
+###
+GET https://saptfe.accounts.ondemand.com/scim/Groups
+Content-Type: application/json
+Authorization: Basic ARAJSINHA:jMWwWMzjYyAvuzWHfrvVDW+lnuGZTNYZawPFg9ux
+
+###
+GET http://localhost:4004/odata/v4/asset-disposal/AssetDisposal.witness?groupName="SP_WITNESS"
+Content-Type: application/json
+
 # {
 #    "ReferenceDocumentItem": "string",
 #    "BusinessTransactionType": "string",

@@ -28,8 +28,8 @@
     "crossNavigation": {
       "inbounds": {
         "incidents-display": {
-          "semanticObject": "incidents",
-          "action": "display",
+          "semanticObject": "assetdisposal",
+          "action": "request",
           "title": "{{flpTitle}}",
           "subTitle": "{{flpSubtitle}}",
           "signature": {

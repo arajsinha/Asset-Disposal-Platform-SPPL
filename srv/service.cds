@@ -14,11 +14,19 @@ service DepartmentMaintenance {
 
 service AssetDisposal {
 
-  type inVoid     : {
+  type userDetails : {
+    email      : String;
+    familyName : String;
+    givenName  : String;
+  }
+
+  function witness(groupName : String) returns array of userDetails;
+
+  type inVoid      : {
     comment : String;
   };
 
-  type inWithdraw : {
+  type inWithdraw  : {
     comment : String;
   };
 
@@ -53,7 +61,6 @@ service AssetDisposal {
   entity AssetDetails        as projection on spassets.AssetDetails
     actions {
       action sideEffectTriggerAction();
-      action sideEffectDisposalAction();
     };
 
   annotate AssetDetails with @(Common: {SideEffects #triggerActionProperty: {
@@ -74,7 +81,10 @@ service AssetDisposal {
 
   annotate AssetDetails with @(Common: {SideEffects: {
     SourceProperties: [disposalMethod],
-    TargetProperties: ['salvageMandatory', ]
+    TargetProperties: [
+      'salvageMandatory',
+      'scrapValue'
+    ]
   }});
 
   entity DisposalMethod      as projection on spassets.DisposalMethod;

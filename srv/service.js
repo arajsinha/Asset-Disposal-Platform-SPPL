@@ -106,6 +106,38 @@ module.exports = class AssetDisposal extends cds.ApplicationService {
             }
         })
 
+        // const srv = await cds.connect.to('witness')
+        // await srv.send('witness',{groupName: ''})
+
+        this.on('witness', async(req) => {
+            // console.log(req)
+            // const groupName = "SP_WITNESS"
+            const identity = await cds.connect.to("identity")
+            let groups = await identity.send({
+                method: 'GET', path: '/Groups/733c2879-63a4-414a-a3c0-baba639addf4', headers: { Accept: 'application/scim+json' }
+            });
+            const membersConditionString = groups.members
+                .map(member => `id eq "${member.value}"`)
+                .join(' or ');
+            let getUserDetails = await identity.send({
+                method: 'GET', path: `/Users?filter=${membersConditionString}`, headers: { Accept: 'application/scim+json' }
+            });
+            console.log(getUserDetails);
+            const usersInfo = getUserDetails.Resources.map(user => {
+                const email = user.emails.find(email => email.primary)?.value || 'No primary email';
+                const familyName = user.name.familyName || 'No family name';
+                const givenName = user.name.givenName || 'No given name';
+
+                return {
+                    email,
+                    familyName,
+                    givenName
+                };
+            });
+
+            return (usersInfo);
+        })
+
         this.on('retire', "RequestDetails", async (req) => {
             let assetDetails = await SELECT.one.from(RequestDetails).columns(r => {
                 r`.*`,
@@ -266,18 +298,18 @@ module.exports = class AssetDisposal extends cds.ApplicationService {
 
         })
 
-        // this.on('sideEffectDisposalAction', "AssetDetails.drafts", async (req) => {
-        //     let ans = await SELECT.one.from(AssetDetails.drafts).where({ 'ID': req.params[1].ID })
-        //     console.log(ans.disposalMethod)
-        // })
 
         this.after("READ", "AssetDetails.drafts", async (results, req) => {
             for (const result of results) {
                 result.salvageMandatory = 7; //default values
-                
-                if(result.disposalMethod === undefined || result.disposalMethod === 'Write Off') {
-                    let data = await SELECT.from(AssetDetails.drafts).where({'ID': result.ID})
+
+                if (result.disposalMethod === undefined || result.disposalMethod === 'Write Off') {
+                    let data = await SELECT.from(AssetDetails.drafts).where({ 'ID': result.ID })
                     if (data[0].disposalMethod === 'Write Off') {
+                        await UPDATE.entity(AssetDetails.drafts).set(
+                            {
+                                'scrapValue': 0.00,
+                            }).where({ 'ID': result.ID });
                         result.scrapValue = '';
                         result.salvageMandatory = 1;
                     }
@@ -326,10 +358,10 @@ module.exports = class AssetDisposal extends cds.ApplicationService {
                     table: "spassets.RequestDetails",
                     field: "OBJECTID"
                 });
-        
+
                 let objectId = await objectIdSeqNo.getNextNumber();
-                req.data.objectId = "RETOPS-" + objectId;
-                
+                req.data.objectId = "ASSETDISPOSALREQ-" + objectId;
+
                 req.data.RequestStatus_id = "INP";
             }
             catch (error) {
@@ -341,7 +373,7 @@ module.exports = class AssetDisposal extends cds.ApplicationService {
         this.before("NEW", "RequestDetails.drafts", async (req) => {
             console.log(req.data);
             req.data.assetDetails ??= {};
-            req.data.objectId = 'RETOPS-' + '$';
+            req.data.objectId = 'ASSETDISPOSALREQ-' + '$';
             req.data.RequestStatus_id = "NEW";
             req.data.date = new Date().toISOString().split('T')[0];
             req.data.requestorName = (req.user.attr.givenName) + " " + (req.user.attr.familyName);
@@ -423,7 +455,7 @@ module.exports = class AssetDisposal extends cds.ApplicationService {
                     workflowID: res.id,  // The new workflowID to be added
                     requestDetails_ID: req.ID  // Link it to the corresponding RequestDetails
                 });
-                let auditTrail = await SELECT.from(AuditTrail).where({'requestDetails_ID': req.ID });
+                let auditTrail = await SELECT.from(AuditTrail).where({ 'requestDetails_ID': req.ID });
                 await UPDATE.entity(RequestDetails).set(
                     {
                         'date': auditTrail[0].timestamp

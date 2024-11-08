@@ -56,12 +56,12 @@ annotate service.RequestDetails with @(
                 true
             ]}}
         },
-        // {
-        //     $Type        : 'UI.DataFieldForAction',
-        //     Action       : 'AssetDisposal.retire',
-        //     Determining  : true,
-        //     Label        : 'Retire'
-        // }
+        {
+            $Type        : 'UI.DataFieldForAction',
+            Action       : 'AssetDisposal.witness',
+            Determining  : true,
+            Label        : 'Witness'
+        }
     ],
     UI.SelectionPresentationVariant #table: {
         $Type              : 'UI.SelectionPresentationVariantType',
@@ -463,6 +463,7 @@ annotate service.AssetDetails with {
             Label         : 'Asset number from Department Cost Centers',
         },
         Common.ValueListWithFixedValues: false,
+        Common.FieldControl : #Mandatory,
     )
 };
 
