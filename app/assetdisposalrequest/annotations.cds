@@ -55,12 +55,6 @@ annotate service.RequestDetails with @(
                 {$Path: 'canVoid'},
                 true
             ]}}
-        },
-        {
-            $Type        : 'UI.DataFieldForAction',
-            Action       : 'AssetDisposal.witness',
-            Determining  : true,
-            Label        : 'Witness'
         }
     ],
     UI.SelectionPresentationVariant #table: {
@@ -337,6 +331,10 @@ annotate service.AuditTrail with @(
             $Type: 'UI.DataField',
             Value: status,
         },
+        {
+            $Type : 'UI.DataField',
+            Value : requestDetails.objectId,
+        },
     ],
     UI.SelectionPresentationVariant #AuditTrail: {
         $Type              : 'UI.SelectionPresentationVariantType',
@@ -434,6 +432,12 @@ annotate service.AssetDetails with {
         Common.ValueListWithFixedValues: true,
     )
 };
+
+annotate service.DepartmentAssets with @Capabilities : { FilterRestrictions : {
+    $Type : 'Capabilities.FilterRestrictionsType',
+    NonFilterableProperties: [department, assetDesc, costCenter, assetNumber]
+}, };
+
 
 annotate service.AssetDetails with {
     assetNumber @(

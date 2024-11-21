@@ -35,7 +35,9 @@ service AssetDisposal {
 
 
     actions {
+
       @(
+        restrict: [{ to: 'Asset_Request_Write' }],
         cds.odata.bindingparameter.name: 'in',
         Common.SideEffects             : {TargetProperties: [
           'in/RequestStatus_id',
@@ -46,6 +48,7 @@ service AssetDisposal {
       action withdraw(text : inWithdraw:comment);
 
       @(
+        restrict: [{ to: 'Asset_Request_Write' }],
         cds.odata.bindingparameter.name: 'in',
         Common.SideEffects             : {TargetProperties: [
           'in/RequestStatus_id',
@@ -54,6 +57,7 @@ service AssetDisposal {
         ]}
       )
       action void(text : inVoid:comment);
+      @(restrict: [{ to: 'Asset_Request_Write' }])
       action retire();
     }
 
@@ -108,6 +112,15 @@ service AssetDisposal {
   entity DepartmentAssets    as projection on spassets.DepartmentAssets;
 
   annotate RequestDetails with @(restrict: [
-  { grant: 'WRITE', to: 'Asset_Request_Write' },
-  { grant: 'READ', to: 'authenticated-user' } ]);
+    {
+      grant: 'WRITE',
+      to   : 'Asset_Request_Write'
+    },
+    {
+      grant: 'READ',
+      to   : 'authenticated-user'
+    }
+  ]);
 }
+
+

@@ -166,6 +166,16 @@
                   "tableSettings": {
                     "type": "GridTable"
                   }
+                },
+                "AuditTrail/@com.sap.vocabularies.UI.v1.LineItem#AuditTrail": {
+                  "columns": {
+                    "DataField::approverName": {
+                      "width": "8%"
+                    },
+                    "DataField::approver": {
+                      "width": "12%"
+                    }
+                  }
                 }
               }
             }

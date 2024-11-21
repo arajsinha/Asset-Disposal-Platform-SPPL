@@ -17,7 +17,9 @@
     {
       "name": "$XSAPPNAME.user",
       "description": "UAA",
-      "granted-apps" : [ "$XSAPPNAME(application,assetdisposaltask)"]
+      "granted-apps": [
+        "$XSAPPNAME(application,assetdisposaltask)"
+      ]
     },
     {
       "name": "$XSAPPNAME.Asset_Request_Write",

@@ -30,7 +30,7 @@ Accept: application/json
 }
 
 ### Call Audit Trail Action
-POST http://localhost:4004/odata/v4/asset-disposal/RequestDetails(ID=2a0abd62-e2e2-451d-844d-69a9ef69802d, IsActiveEntity=true)/AssetDisposal.retire
+POST http://localhost:4004/odata/v4/asset-disposal/RequestDetails(ID=527d7c15-c351-48bd-a146-2bd7fa9e0736, IsActiveEntity=true)/AssetDisposal.retire
 Content-Type: application/json
 
 {

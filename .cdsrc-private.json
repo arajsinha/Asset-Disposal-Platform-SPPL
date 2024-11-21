@@ -5,8 +5,8 @@
         "binding": {
           "type": "cf",
           "apiEndpoint": "https://api.cf.ap11.hana.ondemand.com",
-          "org": "Technical Field Enablement_sap-process-automation-tfe",
-          "space": "DEV",
+          "org": "Singapore Pools (Pte) Ltd",
+          "space": "UAT",
           "instance": "asset-disposal-singaporepools-db",
           "key": "asset-disposal-singaporepools-db-key",
           "resolved": false
@@ -20,10 +20,10 @@
         "binding": {
           "type": "cf",
           "apiEndpoint": "https://api.cf.ap11.hana.ondemand.com",
-          "org": "Technical Field Enablement_sap-process-automation-tfe",
-          "space": "DEV",
-          "instance": "sp-destination",
-          "key": "sp-destination-key",
+          "org": "Singapore Pools (Pte) Ltd",
+          "space": "UAT",
+          "instance": "asset-disposal-singaporepools-destination",
+          "key": "asset-disposal-singaporepools-destination-key",
           "resolved": false
         },
         "kind": "destinations",
@@ -31,26 +31,12 @@
           "name": "destinations"
         }
       },
-      "custom-service:sdm-di-instance": {
-        "binding": {
-          "type": "cf",
-          "apiEndpoint": "https://api.cf.ap11.hana.ondemand.com",
-          "org": "Technical Field Enablement_sap-process-automation-tfe",
-          "space": "DEV",
-          "instance": "sdm-di-instance",
-          "key": "sdm-di-instance-key",
-          "resolved": false
-        },
-        "vcap": {
-          "name": "custom-service:sdm-di-instance"
-        }
-      },
       "auth": {
         "binding": {
           "type": "cf",
           "apiEndpoint": "https://api.cf.ap11.hana.ondemand.com",
-          "org": "Technical Field Enablement_sap-process-automation-tfe",
-          "space": "DEV",
+          "org": "Singapore Pools (Pte) Ltd",
+          "space": "UAT",
           "instance": "asset-disposal-auth",
           "key": "asset-disposal-auth-key",
           "resolved": false
@@ -64,8 +50,8 @@
         "binding": {
           "type": "cf",
           "apiEndpoint": "https://api.cf.ap11.hana.ondemand.com",
-          "org": "Technical Field Enablement_sap-process-automation-tfe",
-          "space": "DEV",
+          "org": "Singapore Pools (Pte) Ltd",
+          "space": "UAT",
           "instance": "object-store-aws",
           "key": "object-store-aws-key",
           "resolved": false
@@ -73,20 +59,6 @@
         "kind": "s3",
         "vcap": {
           "name": "objectstore"
-        }
-      },
-      "malware-scanner": {
-        "binding": {
-          "type": "cf",
-          "apiEndpoint": "https://api.cf.ap11.hana.ondemand.com",
-          "org": "Technical Field Enablement_sap-process-automation-tfe",
-          "space": "DEV",
-          "instance": "malware-scan",
-          "key": "malware-scan-key",
-          "resolved": false
-        },
-        "vcap": {
-          "name": "malware-scanner"
         }
       }
     }

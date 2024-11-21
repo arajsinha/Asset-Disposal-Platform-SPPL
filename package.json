@@ -34,6 +34,7 @@
     "undeploy": "cf undeploy asset-disposal-singaporepools --delete-services --delete-service-keys --delete-service-brokers",
     "build": "rimraf resources mta_archives && mbt build --mtar archive",
     "deploy": "cf deploy mta_archives/archive.mtar --retries 1",
+    "uaa": "cds bind --exec -- npm start --prefix app/router",
     "watch-departmaintenance": "cds watch --open departmaintenance/webapp/index.html?sap-ui-xx-viewCache=false",
     "watch-assetusermap": "cds watch --open assetusermap/webapp/index.html?sap-ui-xx-viewCache=false",
     "watch-assetdisposalrequest": "cds watch --open assetdisposalrequest/webapp/index.html?sap-ui-xx-viewCache=false"
@@ -65,7 +66,7 @@
       "spa-process-automation-tokenexchange": {
         "kind": "rest",
         "credentials": {
-          "destination": "sap_process_automation_service_tokenexchange"
+          "destination": "spa-process-automation-tokenexchange"
         }
       },
       "attachments": {

@@ -17,6 +17,8 @@ module.exports = class AssetDisposalTaskUI extends cds.ApplicationService {
             // console.log(req.data)
             // console.log(req.user);
             // return;
+            let data = await SELECT.from(RequestDetails).where({'ID': req.data.requestId})
+            const objectID = data[0].objectId
             await INSERT.into(AuditTrail).entries(
                 {
                     workflows_ID: req.data.workflowId,
@@ -26,6 +28,7 @@ module.exports = class AssetDisposalTaskUI extends cds.ApplicationService {
                     taskType: req.data.taskType,
                     subject: req.data.taskTitle,
                     timestamp: new Date,
+                    objectId: objectID,
                     approver: req.user.attr.email,
                     comment: req.data.comment,
                     approverName: `${req.user.attr.givenName} ${req.user.attr.familyName}`,
@@ -36,6 +39,9 @@ module.exports = class AssetDisposalTaskUI extends cds.ApplicationService {
 
             if(req.data.status === "Void"){
                 await UPDATE.entity(RequestDetails).set({ 'RequestStatus_id': "VOD" }).where({ 'ID': req.data.requestId });
+            }
+            if(req.data.status === "Rejected"){
+                await UPDATE.entity(RequestDetails).set({ 'RequestStatus_id': "REJ" }).where({ 'ID': req.data.requestId });
             }
         })
 

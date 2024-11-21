@@ -39,23 +39,34 @@ module.exports = class AssetDisposal extends cds.ApplicationService {
         });
 
         this.on('READ', 'DepartmentAssets', async (req) => {
-            let department_name;
+            let department_name, asset_no_search_str, where_condition;
             if (req.query.SELECT.where?.[0].ref?.[0] === "department") {
                 department_name = req.query.SELECT.where?.[2].val;
             }
+            if(req.query.SELECT.search){
+                asset_no_search_str = req.query.SELECT.search[0].val;
+                asset_no_search_str = asset_no_search_str.replace(/"/g, "'");
+            }
             let data = await SELECT.from(Departments)
-                .columns(r => {
-                    r`.*`,
-                        r.costCenters(cc => { cc`.*` })
-                }).where({ name: department_name })
+                                .columns(r => { r`.*`,
+                                                r.costCenters(cc => { cc`.*` })
+                                }).where({ name: department_name });
             const costCentersArray = data[0].costCenters.map(center => center.costCenter);
             if (costCentersArray.length > 0) {
+                where_condition = { 'CostCenter': { in: costCentersArray },
+                                    'ValidityEndDate': '9999-12-31'     };
+                // if(asset_no_search_str != undefined) where_condition.MasterFixedAsset = {"like":asset_no_search_str}
+                let costCentersFilterInString   = `(${costCentersArray.map(center=>"CostCenter = '"+center+"'").join(' or ')})`
+                let validityDateFilterInString  = `ValidityEndDate = '9999-12-31'`
+                let assetNumberFilterInString   = `substringof(MasterFixedAsset,${asset_no_search_str})`
+                
+                if(asset_no_search_str != undefined)
+                    where_condition = cds.parse.expr(`${costCentersFilterInString} and ${validityDateFilterInString} and ${assetNumberFilterInString}`)
+                else
+                    where_condition = cds.parse.expr(`${costCentersFilterInString} and ${validityDateFilterInString}`)
                 let assetData = await fixa.run(
                     SELECT.from(YY1_FIXED_ASSETS_CC)
-                        .where({
-                            'CostCenter': { in: costCentersArray },
-                            'ValidityEndDate': '9999-12-31' // Additional AND condition
-                        })
+                        .where(where_condition)
                     // .limit(req.query.SELECT.limit.offset.val, req.query.SELECT.limit.rows.val)
                 );
                 const finalAssetData = assetData.map((center) => { return { assetNumber: center.FixedAssetExternalID, costCenter: center.CostCenter, assetDesc: center.FixedAssetDescription } });
@@ -83,8 +94,10 @@ module.exports = class AssetDisposal extends cds.ApplicationService {
                                 "approver": req.user.id
                             }
                         });
+                        let objectId = await SELECT.from(RequestDetails).where({ 'ID': req.params[0].ID })
                         await taskUI.send('addAuditTrial', "AssetDisposalTaskUI.RequestDetails", {
                             requestId: req.params[0].ID,
+                            objectId: objectId[0].objectId,
                             taskID: task.id,
                             taskName: task.subject,
                             taskType: "Complete Workflow",
@@ -109,7 +122,7 @@ module.exports = class AssetDisposal extends cds.ApplicationService {
         // const srv = await cds.connect.to('witness')
         // await srv.send('witness',{groupName: ''})
 
-        this.on('witness', async(req) => {
+        this.on('witness', async (req) => {
             // console.log(req)
             // const groupName = "SP_WITNESS"
             const identity = await cds.connect.to("identity")
@@ -155,15 +168,13 @@ module.exports = class AssetDisposal extends cds.ApplicationService {
             }
             const postingDay = new Date(witnessedByDate);
             const formattedDate = postingDay.toISOString().split('T')[0];
-            // const postingDay = new Date();
-            // const formattedDate = postingDay.toISOString().split('T')[0];
-            let retireData = {
-                ReferenceDocumentItem: "1",
-                CompanyCode: "2000",
-                FixedAssetRetirementType: "1"
-            }
             for (const asset of assetDetails.assetDetails) {
-                if (asset.isRetired == false) {
+                let retireData = {
+                    ReferenceDocumentItem: "1",
+                    CompanyCode: "2000",
+                    FixedAssetRetirementType: "1"
+                }
+                if (!asset.isRetired) {
                     if (asset.disposalMethod == 'Disposal') {
                         retireData.BusinessTransactionType = "RA20"
                         retireData.FxdAstRetirementRevenueType = "1"
@@ -178,33 +189,27 @@ module.exports = class AssetDisposal extends cds.ApplicationService {
                     retireData.DocumentDate = formattedDate
                     retireData.PostingDate = formattedDate
                     retireData.AssetValueDate = formattedDate
-                    try {
-                        let res = await retire.send({
-                            method: 'POST',
-                            headers: {
-                                "Content-Type": "application/json",
-                            },
-                            path: `/FixedAssetRetirement/SAP__self.Post`,
-                            data: retireData
-                        })
-                        console.log(res)
-                        await UPDATE.entity(AssetDetails).set(
-                            {
-                                "isRetired": true
-                            }).where({ 'ID': assetDetails.assetDetails[0].ID });
-                    } catch (error) {
-                        console.log(error)
-                        await UPDATE.entity(AssetDetails).set(
-                            {
-                                "isRetired": false
-                            }).where({ 'ID': assetDetails.assetDetails[0].ID });
-                        await UPDATE.entity(RequestDetails).set(
-                            {
-                                "RequestStatus_id": "APR"
-                            }).where({ 'ID': req.params[0].ID });
-                    }
+
+                    let res = await retire.send({
+                        method: 'POST',
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        path: `/FixedAssetRetirement/SAP__self.Post`,
+                        data: retireData
+                    })
+                    console.log(res)
+                    await UPDATE.entity(AssetDetails).set(
+                        {
+                            "isRetired": true
+                        }).where({ 'ID': asset.ID });
                 }
             }
+
+            await UPDATE.entity(RequestDetails).set(
+                {
+                    "RequestStatus_id": "APR"
+                }).where({ 'ID': req.params[0].ID });
         })
 
         this.on('withdraw', "RequestDetails", async (req) => {
@@ -214,8 +219,10 @@ module.exports = class AssetDisposal extends cds.ApplicationService {
                 method: 'GET', path: `/workflow/rest/v1/task-instances?workflowInstanceId=${workflows.currentWorkflowID}`
             });
             for (const task of tasks) {
+                let objectId = await SELECT.from(RequestDetails).where({ 'ID': req.params[0].ID })
                 await taskUI.send('addAuditTrial', "AssetDisposalTaskUI.RequestDetails", {
                     requestId: req.params[0].ID,
+                    objectId: objectId[0].objectId,
                     taskID: task.id,
                     taskName: task.subject,
                     taskType: "Withdraw",
@@ -228,7 +235,7 @@ module.exports = class AssetDisposal extends cds.ApplicationService {
             }
             await approval.send({
                 method: 'PATCH', path: '/workflow/rest/v1/workflow-instances/' + workflows.currentWorkflowID, data: {
-                    "definitionId": "eu10.sap-process-automation-tfe.singaporepoolsassets.assetDisposalApproval",
+                    "definitionId": "ap11.sppl-test.assetdisposalworkflowsingaporepools.assetDisposalApproval",
                     "status": "CANCELED"
                 }
             })
@@ -244,6 +251,8 @@ module.exports = class AssetDisposal extends cds.ApplicationService {
                 result.canRetire = false; //default values
             }
         });
+
+        
 
         this.after("READ", "RequestDetails", async (results, req) => {
             try {
@@ -360,7 +369,7 @@ module.exports = class AssetDisposal extends cds.ApplicationService {
                 });
 
                 let objectId = await objectIdSeqNo.getNextNumber();
-                req.data.objectId = "ASSETDISPOSALREQ-" + objectId;
+                req.data.objectId = "FA-DISPOSAL-" + objectId;
 
                 req.data.RequestStatus_id = "INP";
             }
@@ -373,7 +382,7 @@ module.exports = class AssetDisposal extends cds.ApplicationService {
         this.before("NEW", "RequestDetails.drafts", async (req) => {
             console.log(req.data);
             req.data.assetDetails ??= {};
-            req.data.objectId = 'ASSETDISPOSALREQ-' + '$';
+            req.data.objectId = 'FA-DISPOSAL-' + '$';
             req.data.RequestStatus_id = "NEW";
             req.data.date = new Date().toISOString().split('T')[0];
             req.data.requestorName = (req.user.attr.givenName) + " " + (req.user.attr.familyName);
@@ -409,21 +418,23 @@ module.exports = class AssetDisposal extends cds.ApplicationService {
             );
 
             // Assign the calculated values
-            req.totalPurchaseCost = result.total.toFixed(3);
-            req.maxPurchaseCost = result.max.toFixed(3);
+            req.totalPurchaseCost = result.total.toFixed(2);
+            req.maxPurchaseCost = result.max.toFixed(2);
 
             let workflowContext = {}
+            let requestId = await SELECT.from(RequestDetails).where({ 'ID': req.ID })
+            workflowContext.maxpurchasecost = Math.floor(req.maxPurchaseCost);
             workflowContext.objectid = req.ID;
             let deptName = await SELECT.from(Departments).where({ 'name': data[0].department_name });
             workflowContext.departmentname = deptName[0].name;
-            workflowContext.maxpurchasecost = Math.floor(req.maxPurchaseCost);
+            workflowContext.requestid = requestId[0].objectId;
 
             const approval = await cds.connect.to("spa-process-automation-tokenexchange")
             try {
                 let res = await approval.send({
                     method: 'POST', path: '/workflow/rest/v1/workflow-instances', data:
                     {
-                        "definitionId": "eu10.sap-process-automation-tfe.singaporepoolsassets.assetDisposalApproval",
+                        "definitionId": "ap11.sppl-test.assetdisposalworkflowsingaporepools.assetDisposalApproval",
                         "context": workflowContext
                     }
                 })
@@ -439,8 +450,10 @@ module.exports = class AssetDisposal extends cds.ApplicationService {
                         r`.*`
                     })
                     .where({ ID: req.ID });
+                let objectId = await SELECT.from(RequestDetails).where({ 'ID': req.ID })
                 await taskUI.send('addAuditTrial', "AssetDisposalTaskUI.RequestDetails", {
                     requestId: req.ID,
+                    objectId: objectId[0].objectId,
                     taskID: "workflowcreationtask",
                     taskName: "Asset Disposal Request Created",
                     taskType: "Asset Disposal Workflow Created By",

@@ -3,6 +3,7 @@ using deptassets from '../db/department_maintenance';
 
 type auditTrailType : {
   taskID     : String(100);
+  objectId  : String(24);
   taskName   : String(100);
   taskType   : String(100);
   taskTitle  : String(100);
@@ -18,6 +19,7 @@ service AssetDisposalTaskUI {
       action void();
       action addAuditTrial(requestId : RequestDetails:ID @mandatory,
                            taskID : auditTrailType:taskID,
+                           objectId: auditTrailType:objectId,
                            taskName : auditTrailType:taskName @mandatory,
                            taskType : auditTrailType:taskType @mandatory,
                            taskTitle : auditTrailType:taskID @mandatory,
