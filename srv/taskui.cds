@@ -14,6 +14,15 @@ type auditTrailType : {
 };
 
 service AssetDisposalTaskUI {
+
+  type userDetails : {
+    email      : String;
+    familyName : String;
+    givenName  : String;
+  }
+
+  function witness( groupName : String) returns array of userDetails;
+
   entity RequestDetails   as projection on spassets.RequestDetails
     actions {
       action void();

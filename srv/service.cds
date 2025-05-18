@@ -14,21 +14,21 @@ service DepartmentMaintenance {
 
 service AssetDisposal {
 
-  type userDetails : {
-    email      : String;
-    familyName : String;
-    givenName  : String;
+  type inVoid     : {
+    comment : String;
+  };
+
+  type inWithdraw : {
+    comment : String;
+  };
+
+  type inUserInfo {
+    groups: String;
   }
 
-  function witness(groupName : String) returns array of userDetails;
-
-  type inVoid      : {
-    comment : String;
-  };
-
-  type inWithdraw  : {
-    comment : String;
-  };
+  type UserInfo {
+    email : String;
+  }
 
   @odata.draft.enabled
   entity RequestDetails      as projection on spassets.RequestDetails
@@ -37,7 +37,7 @@ service AssetDisposal {
     actions {
 
       @(
-        restrict: [{ to: 'Asset_Request_Write' }],
+        restrict                       : [{to: 'Asset_Request_Write'}],
         cds.odata.bindingparameter.name: 'in',
         Common.SideEffects             : {TargetProperties: [
           'in/RequestStatus_id',
@@ -48,7 +48,7 @@ service AssetDisposal {
       action withdraw(text : inWithdraw:comment);
 
       @(
-        restrict: [{ to: 'Asset_Request_Write' }],
+        restrict                       : [{to: 'Asset_Request_Write'}],
         cds.odata.bindingparameter.name: 'in',
         Common.SideEffects             : {TargetProperties: [
           'in/RequestStatus_id',
@@ -57,8 +57,10 @@ service AssetDisposal {
         ]}
       )
       action void(text : inVoid:comment);
-      @(restrict: [{ to: 'Asset_Request_Write' }])
+      @(restrict: [{to: 'Asset_Request_Write'}])
       action retire();
+      @(restrict: [{to: 'Asset_Request_Write'}])
+      action getGroups(text : inUserInfo:groups) returns array of UserInfo;
     }
 
   // @odata.draft.enabled
@@ -122,5 +124,3 @@ service AssetDisposal {
     }
   ]);
 }
-
-

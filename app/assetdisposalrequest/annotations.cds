@@ -504,3 +504,7 @@ annotate service.Departments with {
     }
 };
 
+annotate service.RequestDetails with {
+    objectId @Common.FieldControl : #ReadOnly
+};
+

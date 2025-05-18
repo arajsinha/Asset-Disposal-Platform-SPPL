@@ -6,11 +6,7 @@ module.exports = class AssetDisposal extends cds.ApplicationService {
 
     async init() {
         console.log("Service JS Triggered")
-        const { RequestDetails, RequestStatus, AssetDetails, AuditTrail, Workflows, YY1_FIXED_ASSETS_CC, Departments, Users, ASSET_RETIRE } = this.entities;
-        const logger = cds.log('srv');
-
-        let obj = []
-        let workflowID = null
+        const { RequestDetails, AssetDetails, AuditTrail, Workflows, YY1_FIXED_ASSETS_CC, Departments, AttachmentUpload } = this.entities;
 
         const fixa = await cds.connect.to('YY1_FIXED_ASSET');
         const retire = await cds.connect.to('ASSET_RETIRE');
@@ -24,7 +20,6 @@ module.exports = class AssetDisposal extends cds.ApplicationService {
         });
 
         this.on('READ', 'AssetDisposal.Departments', async (req) => {
-            console.log('Depts');
             try {
                 let data = await SELECT.from(Departments)
                     .columns(r => {
@@ -39,119 +34,203 @@ module.exports = class AssetDisposal extends cds.ApplicationService {
         });
 
         this.on('READ', 'DepartmentAssets', async (req) => {
-            let department_name, asset_no_search_str, where_condition;
-            if (req.query.SELECT.where?.[0].ref?.[0] === "department") {
-                department_name = req.query.SELECT.where?.[2].val;
-            }
-            if(req.query.SELECT.search){
-                asset_no_search_str = req.query.SELECT.search[0].val;
-                asset_no_search_str = asset_no_search_str.replace(/"/g, "'");
-            }
-            let data = await SELECT.from(Departments)
-                                .columns(r => { r`.*`,
-                                                r.costCenters(cc => { cc`.*` })
-                                }).where({ name: department_name });
-            const costCentersArray = data[0].costCenters.map(center => center.costCenter);
-            if (costCentersArray.length > 0) {
-                where_condition = { 'CostCenter': { in: costCentersArray },
-                                    'ValidityEndDate': '9999-12-31'     };
-                // if(asset_no_search_str != undefined) where_condition.MasterFixedAsset = {"like":asset_no_search_str}
-                let costCentersFilterInString   = `(${costCentersArray.map(center=>"CostCenter = '"+center+"'").join(' or ')})`
-                let validityDateFilterInString  = `ValidityEndDate = '9999-12-31'`
-                let assetNumberFilterInString   = `substringof(MasterFixedAsset,${asset_no_search_str})`
-                
-                if(asset_no_search_str != undefined)
-                    where_condition = cds.parse.expr(`${costCentersFilterInString} and ${validityDateFilterInString} and ${assetNumberFilterInString}`)
-                else
-                    where_condition = cds.parse.expr(`${costCentersFilterInString} and ${validityDateFilterInString}`)
-                let assetData = await fixa.run(
-                    SELECT.from(YY1_FIXED_ASSETS_CC)
-                        .where(where_condition)
-                    // .limit(req.query.SELECT.limit.offset.val, req.query.SELECT.limit.rows.val)
-                );
-                const finalAssetData = assetData.map((center) => { return { assetNumber: center.FixedAssetExternalID, costCenter: center.CostCenter, assetDesc: center.FixedAssetDescription } });
-                return finalAssetData;
-            } else {
-                return [];
+            try {
+                let departmentName, assetNoSearchStr, whereCondition;
+
+                // Extract department name from query
+                if (req.query.SELECT.where?.[0].ref?.[0] === "department") {
+                    departmentName = req.query.SELECT.where?.[2].val;
+                }
+
+                // Extract asset number search string and sanitize
+                if (req.query.SELECT.search) {
+                    assetNoSearchStr = req.query.SELECT.search[0].val;
+                    assetNoSearchStr = assetNoSearchStr.toString().replace(/"/g, "'");
+                }
+
+                // Fetch department data with cost centers
+                const departmentData = await SELECT.from(Departments)
+                    .columns(r => {
+                        r`.*`,
+                            r.costCenters(cc => {
+                                cc`.*`;
+                            });
+                    })
+                    .where({ name: departmentName });
+
+                const costCentersArray = departmentData[0].costCenters.map(center => center.costCenter) || [];
+
+                if (costCentersArray.length > 0) {
+                    // Build where condition
+                    whereCondition = {
+                        'CostCenter': { in: costCentersArray },
+                        'ValidityEndDate': '9999-12-31'
+                    };
+
+                    let costCentersFilter = `(${costCentersArray.map(center => "CostCenter = '" + center + "'").join(' or ')})`
+                    let validityDateFilter = `ValidityEndDate = '9999-12-31'`
+                    // let assetNumberFilter = `substringof(MasterFixedAsset,${assetNoSearchStr})`
+
+                    if (assetNoSearchStr != undefined) {
+                        
+                        // Check if it's already wrapped in single quotes
+                        if (!assetNoSearchStr.startsWith("'") || !assetNoSearchStr.endsWith("'")) {
+                            assetNoSearchStr = `'${assetNoSearchStr}'`;
+                        }
+
+                        let assetNumberFilter = `substringof(MasterFixedAsset, ${assetNoSearchStr})`;
+                        whereCondition = cds.parse.expr(`${costCentersFilter} and ${validityDateFilter} and ${assetNumberFilter}`);
+                    }
+                    else
+                        whereCondition = cds.parse.expr(`${costCentersFilter} and ${validityDateFilter}`)
+                    console.log(whereCondition)
+                    // Fetch asset data
+                    const assetData = await fixa.run(
+                        SELECT.from(YY1_FIXED_ASSETS_CC)
+                            .limit(
+                                req.query.SELECT.limit.rows.val,
+                                req.query.SELECT.limit.offset.val
+                            )
+                            .where(whereCondition)
+                            .orderBy`MasterFixedAsset`
+                    );
+
+                    // Transform and return asset data
+                    console.log("Asset Data-----------------")
+                    console.log(assetData)
+                    return assetData.map(center => ({
+                        assetNumber: center.MasterFixedAsset + '-' + center.FixedAsset,
+                        costCenter: center.CostCenter,
+                        assetDesc: center.FixedAssetDescription
+                    }));
+                } else {
+                    return [];
+                }
+            } catch (error) {
+                console.error('Error in DepartmentAssets READ handler:', error.message, error);
+                throw new Error('Failed to fetch department assets. Please try again later.');
             }
         });
 
-        this.on('void', "RequestDetails", async (req) => {
-            let workflows = await SELECT.one.from(RequestDetails).where({ 'ID': req.params[0].ID });
-            const approval = await cds.connect.to("spa-process-automation-tokenexchange")
+
+        this.on('void', 'RequestDetails', async (req) => {
             try {
-                let tasks = await approval.send({
-                    method: 'GET', path: `/workflow/rest/v1/task-instances?workflowInstanceId=${workflows.currentWorkflowID}`
+                // Fetch workflow details
+                const workflow = await SELECT.one.from(RequestDetails).where({ ID: req.params[0].ID });
+                const approval = await cds.connect.to('spa-process-automation-tokenexchange');
+
+                // Fetch tasks associated with the workflow
+                const tasks = await approval.send({
+                    method: 'GET',
+                    path: `/workflow/rest/v1/task-instances?workflowInstanceId=${workflow.currentWorkflowID}`
                 });
+
                 for (const task of tasks) {
                     if (task.status !== 'COMPLETED') {
+                        // Mark the task as completed
                         await approval.send({
                             method: 'PATCH',
-                            path: '/workflow/rest/v1/task-instances/' + task.id,
+                            path: `/workflow/rest/v1/task-instances/${task.id}`,
                             data: {
                                 "status": "COMPLETED",
                                 "decision": "void",
                                 "approver": req.user.id
                             }
                         });
+
+                        // Fetch object ID for the request
                         let objectId = await SELECT.from(RequestDetails).where({ 'ID': req.params[0].ID })
-                        await taskUI.send('addAuditTrial', "AssetDisposalTaskUI.RequestDetails", {
+
+                        // Add an audit trail entry
+                        await taskUI.send('addAuditTrial', 'AssetDisposalTaskUI.RequestDetails', {
                             requestId: req.params[0].ID,
                             objectId: objectId[0].objectId,
                             taskID: task.id,
                             taskName: task.subject,
-                            taskType: "Complete Workflow",
+                            taskType: 'Complete Workflow',
                             taskTitle: task.subject,
                             comment: req.data.text,
-                            status: "Void",
-                            workflowId: workflows.currentWorkflowID,
+                            status: 'Void',
+                            workflowId: workflow.currentWorkflowID,
                             hasVoid: false
                         });
                     }
                 }
 
                 // Update the request status to Void
-                await UPDATE.entity(RequestDetails).set({ 'RequestStatus_id': "VOD" }).where({ 'ID': req.params[0].ID });
+                await UPDATE.entity(RequestDetails)
+                    .set({ 'RequestStatus_id': "VOD" })
+                    .where({ 'ID': req.params[0].ID });
 
+            } catch (error) {
+                console.error('Error handling void operation:', error);
             }
-            catch {
-                console.log(error)
-            }
-        })
+        });
 
-        // const srv = await cds.connect.to('witness')
-        // await srv.send('witness',{groupName: ''})
+        this.on('getGroups', "RequestDetails", async (req) => {
 
-        this.on('witness', async (req) => {
-            // console.log(req)
-            // const groupName = "SP_WITNESS"
+            console.log("----------------------Get Groups=------------------")
+            console.log(req.data.text)
+            let userGroup = req.data.text
             const identity = await cds.connect.to("identity")
-            let groups = await identity.send({
-                method: 'GET', path: '/Groups/733c2879-63a4-414a-a3c0-baba639addf4', headers: { Accept: 'application/scim+json' }
+            let groups
+            groups = await identity.send({
+                method: 'GET', path: `/Groups?filter=displayName eq "${userGroup}"`, headers: { Accept: 'application/scim+json' }
             });
-            const membersConditionString = groups.members
+            // // }
+            const membersConditionString = groups.Resources[0].members
                 .map(member => `id eq "${member.value}"`)
                 .join(' or ');
             let getUserDetails = await identity.send({
                 method: 'GET', path: `/Users?filter=${membersConditionString}`, headers: { Accept: 'application/scim+json' }
             });
             console.log(getUserDetails);
-            const usersInfo = getUserDetails.Resources.map(user => {
+            const emails = getUserDetails.Resources.map(user => {
                 const email = user.emails.find(email => email.primary)?.value || 'No primary email';
-                const familyName = user.name.familyName || 'No family name';
-                const givenName = user.name.givenName || 'No given name';
+                return email;
 
-                return {
-                    email,
-                    familyName,
-                    givenName
-                };
             });
 
-            return (usersInfo);
+            return emails.join(', ');
         })
 
         this.on('retire', "RequestDetails", async (req) => {
+            //Attach the request URL in the S4 acquired asset pre-retirement
+            const url = "https://my301971-api.s4hana.ondemand.com/sap/opu/odata/sap/API_CV_ATTACHMENT_SRV/CreateUrlAsAttachment";
+            const params = {
+                LinkedSAPObjectKey: "2000000000" + 6135450 + "000",
+                Url: "https://sppl-test.launchpad.cfapps.ap11.hana.ondemand.com/site?siteId=39a3e458-aac5-4d79-804d-f20b01b9d403%23assetdisposal-request?sap-ui-app-id-hint=saas_approuter_assetdisposalrequest%26/",
+                UrlDescription: "For Build Work Zone",
+                MIMEType: "text/url",
+                BusinessObjectTypeName: "BUS1022"
+            };
+
+            // Create query string
+            const queryString = new URLSearchParams(params).toString();
+
+            // Make the API call
+            fetch(`${url}?${queryString}`, {
+                method: "POST", // Adjust method if needed (default is GET)
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": "Basic " + btoa("your_username:your_password"), // Replace with actual credentials or token
+                    "Accept": "application/json"
+                },
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! Status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log("Response Data:", data);
+                })
+                .catch(error => {
+                    console.error("Error occurred:", error);
+                });
+
+            //Final Retirement of Asset in S4
             let assetDetails = await SELECT.one.from(RequestDetails).columns(r => {
                 r`.*`,
                     r.assetDetails(cc => { cc`.*` }),
@@ -168,10 +247,12 @@ module.exports = class AssetDisposal extends cds.ApplicationService {
             }
             const postingDay = new Date(witnessedByDate);
             const formattedDate = postingDay.toISOString().split('T')[0];
+            // const postingDay = new Date();
+            // const formattedDate = postingDay.toISOString().split('T')[0];
             for (const asset of assetDetails.assetDetails) {
                 let retireData = {
                     ReferenceDocumentItem: "1",
-                    CompanyCode: "2000",
+                    CompanyCode: asset.companyCode,
                     FixedAssetRetirementType: "1"
                 }
                 if (!asset.isRetired) {
@@ -235,7 +316,7 @@ module.exports = class AssetDisposal extends cds.ApplicationService {
             }
             await approval.send({
                 method: 'PATCH', path: '/workflow/rest/v1/workflow-instances/' + workflows.currentWorkflowID, data: {
-                    "definitionId": "ap11.sppl-test.assetdisposalworkflowsingaporepools.assetDisposalApproval",
+                    "definitionId": "ap11.sppl-test.assetdisposalworkflowsingaporepools1.assetDisposalApproval",
                     "status": "CANCELED"
                 }
             })
@@ -252,7 +333,7 @@ module.exports = class AssetDisposal extends cds.ApplicationService {
             }
         });
 
-        
+
 
         this.after("READ", "RequestDetails", async (results, req) => {
             try {
@@ -328,18 +409,35 @@ module.exports = class AssetDisposal extends cds.ApplicationService {
 
         this.on('sideEffectTriggerAction', "AssetDetails.drafts", async (req) => {
             let ans = await SELECT.one.from(AssetDetails.drafts).where({ 'ID': req.params[1].ID })
+            // let assetDetails = await SELECT.one.from(AssetDetails.drafts).columns(r => {
+            //     r`.*`,
+            //         r.assetDetails(cc => { cc`.*` })
+            // }).where({ 'ID': req.params[0].ID });
             const nbv = await cds.connect.to("ASSET_BALANCE")
             let now = new Date().toISOString().split('.')[0];
+            let today = new Date();
+            let year = today.getFullYear();
+            let month = today.getMonth() + 1; // getMonth() returns 0-based index
+
+            // Determine fiscal year
+            let fiscalYear = month > 3 ? year : year - 1;
+
+            // Determine fiscal period
+            let fiscalPeriod = month >= 4 ? month - 3 : month + 9;
+
+            // console.log({ fiscalYear, fiscalPeriod });
+
             let formattedDate = `datetime'${now.replace('Z', '')}'`;
+            let assetData = await fixa.run(SELECT.one.from(YY1_FIXED_ASSETS_CC).where({ 'FixedAssetExternalID': ans.assetNumber }));
             let NBVvalues = {
                 AssetAccountingKeyFigureSet: "ABS_DEF",
-                FiscalYear: "2024",
-                FiscalPeriod: "12",
+                FiscalYear: fiscalYear,
+                FiscalPeriod: fiscalPeriod,
                 KeyDate: formattedDate,
                 AssetDepreciationArea: '01',
                 CurrencyRole: '10',
                 Ledger: '0L',
-                CompanyCode: '2000',
+                CompanyCode: assetData.CompanyCode,
             }
             let res = await nbv.send({
                 method: 'GET', path: `YY1_Asset_Balance_Cube(P_AssetAccountingKeyFigureSet='${NBVvalues.AssetAccountingKeyFigureSet}',P_FiscalYear='${NBVvalues.FiscalYear}',P_FiscalPeriod='${NBVvalues.FiscalPeriod}',P_KeyDate=datetime'2025-12-30T00:00:00')/Results?$format=json&$filter=MasterFixedAsset eq '${ans.assetNumber.split("-")[0]}' and AssetDepreciationArea eq '${NBVvalues.AssetDepreciationArea}' and CurrencyRole eq '${NBVvalues.CurrencyRole}' and Ledger eq '${NBVvalues.Ledger}' and CompanyCode eq '${NBVvalues.CompanyCode}' and (AssetAccountingSortedKeyFigure eq '000001-0010700111' or AssetAccountingSortedKeyFigure eq '000014-0010790401')&$select=AssetAccountingSortedKeyFigure,AmountInDisplayCurrency,AcquisitionValueDate`
@@ -348,7 +446,7 @@ module.exports = class AssetDisposal extends cds.ApplicationService {
 
             // Convert the timestamp to a JavaScript Date object
             let dateObject = new Date(timestamp);
-            let assetData = await fixa.run(SELECT.one.from(YY1_FIXED_ASSETS_CC).where({ 'FixedAssetExternalID': ans.assetNumber }));
+
             await UPDATE.entity(AssetDetails.drafts).set({
                 'subNumber': assetData.FixedAsset, 'assetClass': assetData.AssetClass, 'costCenter': assetData.CostCenter, 'netBookValue': res[1].AmountInDisplayCurrency,
                 'assetPurchaseDate': dateObject,
@@ -434,7 +532,7 @@ module.exports = class AssetDisposal extends cds.ApplicationService {
                 let res = await approval.send({
                     method: 'POST', path: '/workflow/rest/v1/workflow-instances', data:
                     {
-                        "definitionId": "ap11.sppl-test.assetdisposalworkflowsingaporepools.assetDisposalApproval",
+                        "definitionId": "ap11.sppl-test.assetdisposalworkflowsingaporepoolsmaincopy.assetDisposalApproval",
                         "context": workflowContext
                     }
                 })
@@ -459,7 +557,7 @@ module.exports = class AssetDisposal extends cds.ApplicationService {
                     taskType: "Asset Disposal Workflow Created By",
                     taskTitle: "Asset Disposal Request Created",
                     comment: "Asset Disposal Request Created",
-                    status: "Gone for Processing",
+                    status: "In Process",
                     workflowId: data[0].currentWorkflowID,
                     hasVoid: false
                 });

@@ -14,9 +14,6 @@ module.exports = class AssetDisposalTaskUI extends cds.ApplicationService {
         // const DB = await cds.connect.to('DB');
 
         this.on("addAuditTrial", "RequestDetails", async (req) => {
-            // console.log(req.data)
-            // console.log(req.user);
-            // return;
             let data = await SELECT.from(RequestDetails).where({'ID': req.data.requestId})
             const objectID = data[0].objectId
             await INSERT.into(AuditTrail).entries(
@@ -43,6 +40,40 @@ module.exports = class AssetDisposalTaskUI extends cds.ApplicationService {
             if(req.data.status === "Rejected"){
                 await UPDATE.entity(RequestDetails).set({ 'RequestStatus_id': "REJ" }).where({ 'ID': req.data.requestId });
             }
+        })
+
+        this.on('witness', async (req) => {
+            const identity = await cds.connect.to("identity")
+            let groups
+            if (req.data?.groupName) {
+                groups = await identity.send({
+                    method: 'GET', path: `/Groups?filter=displayName eq "${req.data.groupName}"`, headers: { Accept: 'application/scim+json' }
+                });
+            } else {
+                groups = await identity.send({
+                    method: 'GET', path: '/Groups?filter=displayName eq "SPPL_WITNESS"', headers: { Accept: 'application/scim+json' }
+                });
+            }
+            const membersConditionString = groups.Resources[0].members
+                .map(member => `id eq "${member.value}"`)
+                .join(' or ');
+            let getUserDetails = await identity.send({
+                method: 'GET', path: `/Users?filter=${membersConditionString}`, headers: { Accept: 'application/scim+json' }
+            });
+            console.log(getUserDetails);
+            const usersInfo = getUserDetails.Resources.map(user => {
+                const email = user.emails.find(email => email.primary)?.value || 'No primary email';
+                const familyName = user.name.familyName || 'No family name';
+                const givenName = user.name.givenName || 'No given name';
+
+                return {
+                    email,
+                    familyName,
+                    givenName
+                };
+            });
+
+            return (usersInfo);
         })
 
         this.on(

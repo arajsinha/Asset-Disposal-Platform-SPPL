@@ -173,7 +173,11 @@ Content-Type: application/json
 Authorization: Basic ARAJSINHA:jMWwWMzjYyAvuzWHfrvVDW+lnuGZTNYZawPFg9ux
 
 ###
-GET http://localhost:4004/odata/v4/asset-disposal/AssetDisposal.witness?groupName="SP_WITNESS"
+GET http://localhost:4004/odata/v4/asset-disposal/AssetDisposal.witness(groupName='SP_WITNESS')
+Content-Type: application/json
+
+###
+GET http://localhost:4004/odata/v4/asset-disposal-task-ui/AssetDisposalTaskUI.witness
 Content-Type: application/json
 
 # {

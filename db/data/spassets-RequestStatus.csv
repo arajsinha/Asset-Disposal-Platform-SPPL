@@ -1,6 +1,6 @@
 id,name,descr
 NEW,New,New
-INP,Approval Inprocess,Approval Inprocess
+INP,Approval In Progress,Approval In Progress
 APR,Approved,Approved
 REJ,Rejected,Rejected
 WTD,Withdrawn,Withdrawn

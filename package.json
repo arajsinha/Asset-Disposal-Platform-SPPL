@@ -23,13 +23,15 @@
     "@cap-js/sqlite": "^1",
     "@sap/cds-dk": "^8",
     "@sap/ux-specification": "UI5-1.128",
-    "rimraf": "^5.0.5"
+    "rimraf": "^5.0.10"
   },
   "workspaces": [
     "attachments"
   ],
   "scripts": {
     "start": "cds-serve",
+    "hybrid": "cds watch --profile hybrid",
+    "authrun": "cds bind --exec -- npm start --prefix app/router",
     "watch-assetdisposal": "cds watch --open assetdisposal/webapp/index.html?sap-ui-xx-viewCache=false",
     "undeploy": "cf undeploy asset-disposal-singaporepools --delete-services --delete-service-keys --delete-service-brokers",
     "build": "rimraf resources mta_archives && mbt build --mtar archive",

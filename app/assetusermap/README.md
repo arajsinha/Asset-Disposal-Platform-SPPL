@@ -9,7 +9,7 @@
 |**Service Type**<br>Local Cap|
 |**Service URL**<br>http://localhost:4004/odata/v4/department-maintenance/|
 |**Module Name**<br>assetusermap|
-|**Application Title**<br>Asset User Mapping with Departments &amp; Cost centers|
+|**Application Title**<br>Asset User Mapping with Departments &amp; Cost Centers|
 |**Namespace**<br>|
 |**UI5 Theme**<br>sap_horizon|
 |**UI5 Version**<br>1.128.1|
