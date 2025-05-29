@@ -26,7 +26,7 @@ module.exports = class AssetDisposal extends cds.ApplicationService {
                         r`.*`,
                             r.users`.*`
                     })
-                    .where(`users.email = 'aryan.raj.sinha@sap.com'`);
+                    .where(`users.email = ${req.user.id}`);
                 return data;
             } catch (error) {
                 console.error('Error fetching departments:', error);
