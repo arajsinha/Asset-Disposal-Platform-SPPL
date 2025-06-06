@@ -26,7 +26,7 @@ module.exports = class AssetDisposal extends cds.ApplicationService {
                         r`.*`,
                             r.users`.*`
                     })
-                    .where(`users.email = ${req.user.id}`);
+                    .where(`users.email = '${req.user.id}'`);
                 return data;
             } catch (error) {
                 console.error('Error fetching departments:', error);
@@ -72,7 +72,7 @@ module.exports = class AssetDisposal extends cds.ApplicationService {
                     // let assetNumberFilter = `substringof(MasterFixedAsset,${assetNoSearchStr})`
 
                     if (assetNoSearchStr != undefined) {
-                        
+
                         // Check if it's already wrapped in single quotes
                         if (!assetNoSearchStr.startsWith("'") || !assetNoSearchStr.endsWith("'")) {
                             assetNoSearchStr = `'${assetNoSearchStr}'`;
@@ -375,7 +375,27 @@ module.exports = class AssetDisposal extends cds.ApplicationService {
                         }
                         if (reqDetail.RequestStatus_id === 'INP') {
                             for (const data of auditTrail) {
-                                if (req.user.id === data.approver && data.status != 'Void' && data.hasVoid) {
+                                const identity = await cds.connect.to("identity")
+                                let groups
+                                groups = await identity.send({
+                                    method: 'GET', path: `/Groups?filter=displayName eq "SPPL_FAO"`, headers: { Accept: 'application/scim+json' }
+                                });
+                                // // }
+                                const membersConditionString = groups.Resources[0].members
+                                    .map(member => `id eq "${member.value}"`)
+                                    .join(' or ');
+                                let getUserDetails = await identity.send({
+                                    method: 'GET', path: `/Users?filter=${membersConditionString}`, headers: { Accept: 'application/scim+json' }
+                                });
+                                console.log(getUserDetails);
+                                const emails = getUserDetails.Resources.map(user => {
+                                    const email = user.emails.find(email => email.primary)?.value || 'No primary email';
+                                    return email;
+
+                                });
+                                console.log("---------------------emails-----------------------")
+                                console.log(emails)
+                                if (emails.includes(req.user.id) && data.status !== 'Void' && data.hasVoid) {
                                     result.canVoid = true;
                                 }
                             }
